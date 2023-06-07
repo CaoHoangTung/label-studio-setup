@@ -1,0 +1,47 @@
+<View>
+  <TimeSeriesLabels name="label" toName="ts">
+    <Label value="Stick only"/>
+    <Label value="Stick + phone call"/>
+    <Label value="Stick + briefcase"/>
+    <Label value="Quadripod only"/>
+    <Label value="Quadripod + phone call"/>
+    <Label value="Quadripod + briefcase"/>
+    <Label value="Rollator"/>
+    <Label value="Frame"/>
+    <Label value="Running"/>
+    <Label value="Static (sitting/standing/lying)"/>
+    <Label value="Standing or sitting with arms active"/>
+  </TimeSeriesLabels>
+  <HyperText name="video" value="$video" inline="true"/>
+  <TimeSeries name="ts" value="$csv" valueType="url" timeColumn="time">
+    <Channel column="accel_x"/>
+  </TimeSeries>
+</View>
+
+
+// working
+<View>
+  <TimeSeriesLabels name="label" toName="ts">
+    <Label value="Stick only"/>
+    <Label value="Stick + phone call"/>
+    <Label value="Stick + briefcase"/>
+    <Label value="Quadripod only"/>
+    <Label value="Quadripod + phone call"/>
+    <Label value="Quadripod + briefcase"/>
+    <Label value="Rollator"/>
+    <Label value="Frame"/>
+    <Label value="Running"/>
+    <Label value="Static (sitting/standing/lying)"/>
+    <Label value="Standing or sitting with arms active"/>
+  </TimeSeriesLabels>
+  <HyperText name="video" value="$video" inline="true"/>
+  <TimeSeries name="ts" value="$csv" valueType="url" timeColumn="time">
+    <Channel column="accel_x"/>
+  </TimeSeries>
+</View>
+
+<!-- {
+    "csv": "/samples/time-series.csv?time=time_column&values=accel_x",
+    "video": "<video src='/static/samples/opossum_snow.mp4' width='100%' controls onloadeddata=\"setTimeout(function(){ts=Htx.annotationStore.selected.names.get('ts');t=ts.data.time_column;v=document.getElementsByTagName('video')[0];w=parseInt(t.length*(5/v.duration));l=t.length-w;ts.updateTR([t[0], t[w]], 1.001);r=$=>
+ts.brushRange.map(n=>(+n).toFixed(2));_=r();setInterval($=>r().some((n,i)=>n!==_[i])&&(_=r())&&(v.currentTime=v.duration*(r()[0]-t[0])/(t.slice(-1)[0]-t[0]-(r()[1]-r()[0]))),300); console.log('video is loaded, starting to sync with time series')}, 3000); \" />"
+  } -->
