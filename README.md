@@ -153,9 +153,27 @@ ts.brushRange.map(n=>(+n).toFixed(2));_=r();setInterval($=>r().some((n,i)=>n!==_
 
 ##### Navigating between tasks
 
-##### Synchronizing time-series and video
+Go to project list and click on the project you have created. You will see a list of tasks that you have created (If you import 1 task then there would be only 1 task available). Click on the task you would like to annotate
+![Navigating between tasks](assets/13-navigate-tasks.jpg)
 
-##### Segmentation annotation
+You will be redirected to a screen that has a video and a time series signal. **Make sure to wait for the video to load, so that the time in video and time in time series signal can be synchronized**
+![Annotation screen](assets/14-annotation-screen.jpg)
+
+##### Annotation process
+
+On the right hand side of the annotating panel, you can notice there is a time series signal being diplayed. Notice the small panel underneath. You can navigate on where to display the signal, and the video will auto adjust the time correspondingly. You can also adjust the window size, but it's recommended that you keep it small and navigating it *slowly* from left to right so the video could load easily. 
+
+See [this video](assets/15-annotation-steps.avi) for more detail instruction of the annotation process.
+
+**Note**
+- **Press play only once in the first time, then use the right panel to navigate**. Wait for a few seconds and the video will autoplay.
+- **Do not use the control of the video** on the left side, since it would not synchronize the corresponding signal
+
+
+##### Exporting data
+To export data, navigate to the project dashboard. Select the task you would like to export, and press the `Export` button. Then select the data format and press `Export` to download the annotated data.
+
+See [this video](assets/16-export-data.avi) for the instruction.
 
 ### Uninstalling the app
 
