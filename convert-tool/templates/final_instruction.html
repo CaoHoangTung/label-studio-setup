@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>List of Downloads</title>
+</head>
+<body>
+    {% include 'navigation.html' %}
+
+    <h1>Instructions</h1>
+    <p>Your file processing is done, please follow these instructions to import the data to Label Studio</p>
+    <h2>Step 1: Download these files</h2>
+    <ul>
+        {% for file in files %}
+        <li>
+            <a href="{{ url_for('download_file', filename=file) }}" download>{{ file }}</a>
+        </li>
+        {% endfor %}
+    </ul>
+    <h2>Step 2: Access label studio</h2>
+    <p>Go to <a target="_blank" href="http://localhost:8080/projects/1/data/import">http://localhost:8080/projects/1/data/import</a>. Create and account if you have not, then login. Choose 'Upload files' and upload the '.json' file you just downloaded above</p>
+    <h2>Step 3: Access the newly create task</h2>
+    <p>Access the newly created task at <a target="_blank" href="http://localhost:8080/projects/1">http://localhost:8080/projects/1</a></p>
+    You can navigate to Label Studio and start annotating
+    <h2>Step 4: Annotate</h2>
+    <h2>Step 5: Export the annotation</h2>
+    <h2>Step 6: Finish</h2>
+    <p>Make sure to handle these 2 files
+        <ul>
+            <li>The .csv file you downloaded earlier</li>
+            <li>The exported annotation files</li>
+        </ul>
+    </p>
+    
+    <h2></h2>
+</body>
+</html>

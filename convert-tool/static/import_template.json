@@ -1,0 +1,8 @@
+[
+    {
+        "sensor": "[[sensor]]", 
+        "csv": "/data/local-files/?d=storage/input/[[csv_filename]]", 
+        "video": "<video src='/data/local-files/?d=storage/input/[[mp4_filename]]' type='video/quicktime' width='100%' controls onloadeddata=\"setTimeout(function(){ts=Htx.annotationStore.selected.names.get('ts');t=ts.data.index;v=document.getElementsByTagName('video')[0];w=parseInt(t.length*(5/v.duration));l=t.length-w;ts.updateTR([t[0], t[w]], 1.001);r=$=>
+ts.brushRange.map(n=>(+n).toFixed(2));_=r();setInterval($=>r().some((n,i)=>n!==_[i])&&(_=r())&&(v.currentTime=v.duration*(r()[0]-t[0])/(t.slice(-1)[0]-t[0]-(r()[1]-r()[0]))),300); console.log('video is loaded, starting to sync with time series')}, 3000); \" />"
+    }
+]

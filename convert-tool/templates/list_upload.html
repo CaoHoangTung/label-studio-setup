@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>List of Uploads</title>
+</head>
+<body>
+    {% include 'navigation.html' %}
+
+    <h1>Select timestamp</h1>
+    <ul>
+        {% for file in files %}
+        <li><a href="#no-download">{{ file }}</a></li>
+        {% endfor %}
+    </ul>
+    <!-- <a style="color: red" href="{{ url_for('delete_upload_files')}}">x Delete all files here</a> -->
+    <br>
+    <form action="/import" method="POST" enctype="multipart/form-data" id="uploadForm">
+        <h4>Sensor 1</h4>
+        <label for="start-date-1">Start:</label>
+        <input type="date" id="start-date-1" name="start-date-1" min="1970-01-01" max="2100-12-31" value={{date_range_1[0]["date"]}}>
+        <input type="time" id="start-time-1" name="start-time-1" min="00:00:00" max="23:59:59" step="1" value={{date_range_1[0]["time"]}}><br><br>
+        
+        <label for="end-date-1">End:</label>
+        <input type="date" id="end-date-1" name="end-date-1" min="1970-01-01" max="2100-12-31" value={{date_range_1[1]["date"]}}>
+        <input type="time" id="end-time-1" name="end-time-1" min="00:00:00" max="23:59:59" step="1" value={{date_range_1[1]["time"]}}><br><br>
+        
+        <h4>Sensor 2</h4>
+        <label for="start-date-2">Start:</label>
+        <input type="date" id="start-date-2" name="start-date-2" min="1970-01-01" max="2100-12-31" value={{date_range_2[0]["date"]}}>
+        <input type="time" id="start-time-2" name="start-time-2" min="00:00:00" max="23:59:59" step="1" value={{date_range_2[0]["time"]}}><br><br>
+        
+        <label for="end-date-2">End:</label>
+        <input type="date" id="end-date-2" name="end-date-2" min="1970-01-01" max="2100-12-31" value={{date_range_2[1]["date"]}}>
+        <input type="time" id="end-time-2" name="end-time-2" min="00:00:00" max="23:59:59" step="1" value={{date_range_2[1]["time"]}}><br><br>
+        
+        <input type="submit" value="Create import files" id="uploadBtn">
+    </form>
+    <div id="message">{{ message }}</div>
+
+    <script>
+        function displayMessage(msg) {
+            document.getElementById("message").innerText = msg;
+        }
+        
+        document.getElementById('uploadBtn').addEventListener('click', function(event) {
+            event.preventDefault();
+
+            this.disabled = true;
+            let message = document.createElement('p');
+            displayMessage("Processing files, please do not turn off the browser. If the files are large, this operation may take some time");
+            document.getElementById("uploadForm").submit();
+
+        });
+    </script>
+</body>
+</html>

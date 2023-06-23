@@ -1,0 +1,4 @@
+Flask==2.3.2
+moviepy==1.0.3
+openmovement==0.0.1
+pandas==2.0.2

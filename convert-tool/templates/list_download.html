@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>List of Downloads</title>
+</head>
+<body>
+    {% include 'navigation.html' %}
+
+    <h1>List of Downloads</h1>
+    <ul>
+        {% for file in files %}
+        <li>
+            <a href="{{ url_for('download_file', filename=file) }}" download>{{ file }}</a>
+        </li>
+        {% endfor %}
+    </ul>
+    <a style="color: red" href="{{ url_for('delete_download_files')}}">x Delete all files here</a>
+</body>
+</html>
