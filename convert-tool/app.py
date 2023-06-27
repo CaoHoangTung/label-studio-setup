@@ -235,7 +235,7 @@ def process_csv(cwa_path, csv_path, start_date, start_time, end_date, end_time):
         result['original_index'] = [i+start_row_index for i in range(len(AX3Data))]
 
         result.to_csv(csv_path, index=True, index_label='index')
-    return True
+    return start_row_index, end_row_index
     
 # Write content to import file
 def create_import_file(import_filename, csv_path, csv_filename, mp4_filename, sensor="unknown", sensor_offset=0):
@@ -281,8 +281,8 @@ def import_label_studio():
         start_date_2, start_time_2 = request.form.get('start-date-2'), request.form.get('start-time-2')
         end_date_2, end_time_2 = request.form.get('end-date-2'), request.form.get('end-time-2')
 
-        process_csv(cwa_file_1, csv_path_1, start_date_1, start_time_1, end_date_1, end_time_1)
-        process_csv(cwa_file_2, csv_path_2, start_date_2, start_time_2, end_date_2, end_time_2)
+        offset_start_1, offset_end_1 = process_csv(cwa_file_1, csv_path_1, start_date_1, start_time_1, end_date_1, end_time_1)
+        offset_start_2, offset_end_2 = process_csv(cwa_file_2, csv_path_2, start_date_2, start_time_2, end_date_2, end_time_2)
 
         # Now, clear the download directory, 
         # then copy the result csv file and the import.json file to the download directory
@@ -300,8 +300,8 @@ def import_label_studio():
 
         print("Creating import file")
 
-        create_import_file(import_filename_1, csv_path_1, csv_filename_1, mp4_filename, sensor=1)
-        create_import_file(import_filename_2, csv_path_2, csv_filename_2, mp4_filename, sensor=2)
+        create_import_file(import_filename_1, csv_path_1, csv_filename_1, mp4_filename, sensor=1, sensor_offset=offset_start_1)
+        create_import_file(import_filename_2, csv_path_2, csv_filename_2, mp4_filename, sensor=2, sensor_offset=offset_start_2)
 
         # Create the import.json file
         # with open(os.path.join(app.config['DOWNLOAD_FOLDER'], import_filename), 'w') as fout:
