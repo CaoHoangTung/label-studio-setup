@@ -44,55 +44,11 @@ If you restart your machine, open Docker and the app will automatically start.
 
 ### Configure the project
 
-After performing the setup, Label Studio can now be accessed via a browser at http://localhost:8080.
-
-#### Create an account
-1. Create a new account on the `Sign Up` panel
-2. Login to the newly created account
-
-#### Create a new project
-To create a new project, click on the `Create Project` button in the app. Type in the project name and description, then click `Save`.
-
-![Create project](assets/07-create-project.jpg)
-
-
-#### Setup labeling interface
-To setup the labeling interface for the video/time-series annotation, perform the following steps:
-
-1. Click on the newly created project.
-2. Click on `Settings` at the top right corner.
-3. Choose `Labeling Interface` menu option.
-4. Paste in the following template, then click `Save`
-```xml
-<View>
-  <TimeSeriesLabels name="label" toName="ts">
-    <Label value="Stick only"/>
-    <Label value="Stick + phone call"/>
-    <Label value="Stick + briefcase"/>
-    <Label value="Quadripod only"/>
-    <Label value="Quadripod + phone call"/>
-    <Label value="Quadripod + briefcase"/>
-    <Label value="Rollator"/>
-    <Label value="Frame"/>
-    <Label value="Running"/>
-    <Label value="Static (sitting/standing/lying)"/>
-    <Label value="Standing or sitting with arms active"/>
-  </TimeSeriesLabels>
-  <View style="display: flex;">
-    <View style="width: 100%">
-        <HyperText name="video" value="$video" inline="true"/>
-    </View>
-    <View style="width: 100%">
-      <TimeSeries name="ts" value="$csv" valueType="url" timeColumn="index">
-        <Channel column="accel_x"/>
-      </TimeSeries>
-    </View>
-  </View>
-</View>
+After performing the setup, Label Studio can now be accessed via a browser at http://localhost:8080. You can create a new account, or login with this default credential
 ```
-
-![Annotation template](assets/08-annotation-template.jpg)
-
+Username: upwatcher
+Password: upwatch
+```
 
 #### Add local storage
 To add the directory to store your data, perform the following steps
@@ -117,37 +73,26 @@ To add the directory to store your data, perform the following steps
 ### Annotation setup
 
 #### Importing data
-For each data annotation, you will need to prepare 2 files:
-- a `.mp4` file: This file contains the video being recorded for annotation.
-- a `.csv` file: This file contains the CWA time series data that correspond to the video. Note that the start and end of the CWA data must match the `mp4` video. The format of the csv file should be as following:
-```
-index,time,accel_x,accel_y,accel_z,temperature
-0,2023-05-08 09:10:18.722778368,0.078125,0.546875,-1.1875,28.515625
-1,2023-05-08 09:10:18.722778368,-0.0625,-0.03125,-1.0,28.515625
-2,2023-05-08 09:10:18.722778368,-0.0625,-0.03125,-1.046875,28.515625
-...
-```
+To import the data, refer to the following step to use the data convert tool to create import files for the annotation tool. You can access the data convert tool at [http://localhost:5000](http://localhost:5000)
 
-To import the data to the annotation tool, refer to the following steps:
-1. Identify the source directory. It is located in the `label-studio` directory on your computer home directory. For example, on Windows, if you user is `username` then the directory would be located at `C:\Users\username\label-studio`.
-2. Navigate to the input storage folder, which would be located in the `data\storage` directory. For the above example, it would be located at `C:\Users\username\label-studio\data\storage\input`.
-3. Move the MP4 and the CSV file into this input storage folder.
-![Move file into input storage](assets/11-import-mov-csv.jpg)
-4. Create an `import.json` file, which has the following content. Replace `$MP4_FILE_NAME$` with the name of your video file, and `$CSV_FILE_NAME$` with the name of your CSV file.
-```
-[
-    {
-        "csv": "/data/local-files/?d=storage/input/$CSV_FILE_NAME$",
-        "video": "<video src='/data/local-files/?d=storage/input/$MP4_FILE_NAME$' width='100%' controls onloadeddata=\"setTimeout(function(){ts=Htx.annotationStore.selected.names.get('ts');t=ts.data.accel_x;v=document.getElementsByTagName('video')[0];w=parseInt(t.length*(5/v.duration));l=t.length-w;ts.updateTR([t[0], t[w]], 1.001);r=$=>
-ts.brushRange.map(n=>(+n).toFixed(2));_=r();setInterval($=>r().some((n,i)=>n!==_[i])&&(_=r())&&(v.currentTime=v.duration*(r()[0]-t[0])/(t.slice(-1)[0]-t[0]-(r()[1]-r()[0]))),300); console.log('video is loaded, starting to sync with time series')}, 3000); \" />"
-    }
-]
-```
-![Import json](assets/12-import-json.jpg)
+##### Upload CWA and MOV file to convert tool
+1. Access the data convert tool at [http://localhost:5000](http://localhost:5000).
+2. Select the MOV file and CWA file of sensor 1 and sensor 2
+3. Press `Upload` to upload the files
+![Upload CWA MOV](assets/18-importtool-firstpage.jpg)
 
-5. Navigate to the project. Click `Import` and select the above `import.json` file. Click `Import`.
-6. You will be directed to the task list screen. Click on the newly created task. You can see the labeling command that has the video and the signal.
-7. (*Important*) Wait for the video to fully load. This ensures that the time from the signal is matched.
+##### Select the time segment for annotation
+Since CWA file contains signals that were recorded in a long time duration, you can select the start and end point to perform annotation. After uploading the files, you will be prompted to select the time start and time end for the two sensors. 
+
+1. Select the Start and End time for the first sensor
+2. Select the Start and End time for the second sensor
+3. Press `Create import files`. If the files are large, it should take a while to process, so be patience and do not close the browser. Typically, a 1GB data would take about 10-15 minutes to process.
+![Create import files](assets/19-importtool-secondpage.jpg)
+
+##### Download the import files and import to label studio
+Follow the instruction provided in the import tool to import the data to Label Studio
+![Download import files](assets/20-importtool-thirdpage.jpg)
+
 
 #### Performing annotation
 

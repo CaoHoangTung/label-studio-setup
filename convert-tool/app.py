@@ -238,11 +238,13 @@ def process_csv(cwa_path, csv_path, start_date, start_time, end_date, end_time):
     return True
     
 # Write content to import file
-def create_import_file(import_filename, csv_filename, mp4_filename, sensor="unknown"):
+def create_import_file(import_filename, csv_path, csv_filename, mp4_filename, sensor="unknown", sensor_offset=0):
     with open("./static/import_template.json") as f_template:
         template_content = f_template.read()
         import_content = template_content.replace('[[csv_filename]]', csv_filename).\
                         replace('[[mp4_filename]]', mp4_filename).\
+                        replace('[[sensor_offset]]', str(sensor_offset)).\
+                        replace('[[csv_path]]', csv_path.replace('\\', '\\\\')).\
                         replace('[[sensor]]', str(sensor))
         with open(os.path.join(app.config['DOWNLOAD_FOLDER'], import_filename), 'w') as fout:
             fout.write(import_content)
@@ -298,8 +300,8 @@ def import_label_studio():
 
         print("Creating import file")
 
-        create_import_file(import_filename_1, csv_filename_1, mp4_filename, sensor=1)
-        create_import_file(import_filename_2, csv_filename_2, mp4_filename, sensor=2)
+        create_import_file(import_filename_1, csv_path_1, csv_filename_1, mp4_filename, sensor=1)
+        create_import_file(import_filename_2, csv_path_2, csv_filename_2, mp4_filename, sensor=2)
 
         # Create the import.json file
         # with open(os.path.join(app.config['DOWNLOAD_FOLDER'], import_filename), 'w') as fout:

@@ -21,6 +21,8 @@ call echo Removing existing Label Studio installation...
 call docker stop label_studio
 call docker rm label_studio
 
+call docker build -t heartexlabs/label-studio:latest ..\label-studio
+
 call set LABEL_STUDIO_LOCAL_FILES_DOCUMENT_ROOT=/label-studio/data
 
 call docker run ^
@@ -32,7 +34,9 @@ call docker run ^
 -p 8080:8080 ^
 -v %LOCAL_DATA_PATH%:%LABEL_STUDIO_LOCAL_FILES_DOCUMENT_ROOT% ^
 heartexlabs/label-studio:latest ^
-label-studio ^
+label-studio start UpwatchSegmentation ^
+--init --no-browser --username upwatcher --password upwatch ^
+--label-config /label-studio/label_studio/annotation_templates/upwatch_video_timeseries/config.xml ^
 --log-level DEBUG
 
 call echo Label Studio setup completed
@@ -47,7 +51,7 @@ call echo Removing existing Convert Tool installation...
 call docker stop convert_tool
 call docker rm convert_tool
 
-call docker build -t convert-tool:latest ../../convert-tool
+call docker build -t convert-tool:latest ../convert-tool
 
 call docker run ^
 --name convert_tool ^
@@ -55,7 +59,8 @@ call docker run ^
 --restart always ^
 -p 5000:5000 ^
 -e PRODUCTION=true ^
--v %LOCAL_STORAGE_PATH%:/app/storage ^
+-e STORAGE_FOLDER=%LABEL_STUDIO_LOCAL_FILES_DOCUMENT_ROOT%/storage ^
+-v %LOCAL_STORAGE_PATH%:%LABEL_STUDIO_LOCAL_FILES_DOCUMENT_ROOT%/storage ^
 convert-tool:latest
 
 call echo Convert Tool setup completed
