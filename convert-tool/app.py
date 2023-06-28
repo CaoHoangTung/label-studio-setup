@@ -248,17 +248,27 @@ def create_import_file(import_filename, csv_path, csv_filename, mp4_filename, se
                         replace('[[sensor]]', str(sensor))
         with open(os.path.join(app.config['DOWNLOAD_FOLDER'], import_filename), 'w') as fout:
             fout.write(import_content)
-        
+
+def append_datetime_prefix(filename, start_date, start_time, end_date, end_time):
+    start_time = start_time.replace(':', '-')
+    end_time = end_time.replace(':', '-')
+    return f'{start_date}-{start_time}_{end_date}-{end_time}_{filename}'
+
 # Process to create import file
 @app.route('/import', methods=['POST'])
 def import_label_studio():
     files = os.listdir(app.config['UPLOAD_FOLDER'])
 
+    start_date_1, start_time_1 = request.form.get('start-date-1'), request.form.get('start-time-1')
+    end_date_1, end_time_1 = request.form.get('end-date-1'), request.form.get('end-time-1')
+    start_date_2, start_time_2 = request.form.get('start-date-2'), request.form.get('start-time-2')
+    end_date_2, end_time_2 = request.form.get('end-date-2'), request.form.get('end-time-2')
+
     cwa_file_1, cwa_file_2, mov_file = find_file(files)
 
     mp4_filename = get_file_name_from_path(mov_file) + '.mp4'
-    csv_filename_1 = get_file_name_from_path(cwa_file_1) + '.csv'
-    csv_filename_2 = get_file_name_from_path(cwa_file_2) + '.csv'
+    csv_filename_1 = append_datetime_prefix(get_file_name_from_path(cwa_file_1) + '.csv', start_date_1, start_time_1, end_date_1, end_time_1)
+    csv_filename_2 = append_datetime_prefix(get_file_name_from_path(cwa_file_2) + '.csv', start_date_2, start_time_2, end_date_2, end_time_2)
 
     mp4_path = os.path.join(STORAGE_INPUT_FOLDER, mp4_filename)
     csv_path_1 = os.path.join(STORAGE_INPUT_FOLDER, csv_filename_1)
@@ -274,15 +284,9 @@ def import_label_studio():
         video = VideoFileClip(mov_file)
         video.write_videofile(mp4_path, codec='libx264')
         video.close()
-
         
-        start_date_1, start_time_1 = request.form.get('start-date-1'), request.form.get('start-time-1')
-        end_date_1, end_time_1 = request.form.get('end-date-1'), request.form.get('end-time-1')
-        start_date_2, start_time_2 = request.form.get('start-date-2'), request.form.get('start-time-2')
-        end_date_2, end_time_2 = request.form.get('end-date-2'), request.form.get('end-time-2')
-
-        offset_start_1, offset_end_1 = process_csv(cwa_file_1, csv_path_1, start_date_1, start_time_1, end_date_1, end_time_1)
-        offset_start_2, offset_end_2 = process_csv(cwa_file_2, csv_path_2, start_date_2, start_time_2, end_date_2, end_time_2)
+        process_csv(cwa_file_1, csv_path_1, start_date_1, start_time_1, end_date_1, end_time_1)
+        process_csv(cwa_file_2, csv_path_2, start_date_2, start_time_2, end_date_2, end_time_2)
 
         # Now, clear the download directory, 
         # then copy the result csv file and the import.json file to the download directory
@@ -300,20 +304,9 @@ def import_label_studio():
 
         print("Creating import file")
 
-        create_import_file(import_filename_1, csv_path_1, csv_filename_1, mp4_filename, sensor=1, sensor_offset=offset_start_1)
-        create_import_file(import_filename_2, csv_path_2, csv_filename_2, mp4_filename, sensor=2, sensor_offset=offset_start_2)
-
-        # Create the import.json file
-        # with open(os.path.join(app.config['DOWNLOAD_FOLDER'], import_filename), 'w') as fout:
-        #     fout.write(json.dumps(
-        #         [
-        #             {
-        #                 "csv": f"/data/local-files/?d=storage/input/{csv_filename}",
-        #                 "video": "<video src='/data/local-files/?d=storage/input/"+mp4_filename+"' type='video/quicktime' width='100%' controls onloadeddata=\"setTimeout(function(){ts=Htx.annotationStore.selected.names.get('ts');t=ts.data.index;v=document.getElementsByTagName('video')[0];w=parseInt(t.length*(5/v.duration));l=t.length-w;ts.updateTR([t[0], t[w]], 1.001);r=$=>" \
-        #                 "ts.brushRange.map(n=>(+n).toFixed(2));_=r();setInterval($=>r().some((n,i)=>n!==_[i])&&(_=r())&&(v.currentTime=v.duration*(r()[0]-t[0])/(t.slice(-1)[0]-t[0]-(r()[1]-r()[0]))),300); console.log('video is loaded, starting to sync with time series')}, 3000); \" />"
-        #             }
-        #         ]
-        #     ))
+        # Setting default offset=0. The index would be the index of the csv bandpass file
+        create_import_file(import_filename_1, csv_path_1, csv_filename_1, mp4_filename, sensor=1, sensor_offset=0)
+        create_import_file(import_filename_2, csv_path_2, csv_filename_2, mp4_filename, sensor=2, sensor_offset=0)
 
         return redirect(url_for('final_instruction'))
     
