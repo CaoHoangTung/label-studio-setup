@@ -46,7 +46,7 @@ If you restart your machine, open Docker and the app will automatically start.
 
 After performing the setup, Label Studio can now be accessed via a browser at http://localhost:8080. You can create a new account, or login with this default credential
 ```
-Username: upwatcher
+Username: upwatcher@gmail.com
 Password: upwatch
 ```
 

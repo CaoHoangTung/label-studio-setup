@@ -35,7 +35,7 @@ call docker run ^
 -v %LOCAL_DATA_PATH%:%LABEL_STUDIO_LOCAL_FILES_DOCUMENT_ROOT% ^
 heartexlabs/label-studio:latest ^
 label-studio start UpwatchSegmentation ^
---init --no-browser --username upwatcher --password upwatch ^
+--init --no-browser --username upwatcher@gmail.com --password upwatch ^
 --label-config /label-studio/label_studio/annotation_templates/upwatch_video_timeseries/config.xml ^
 --log-level DEBUG
 
