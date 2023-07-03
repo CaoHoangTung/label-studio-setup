@@ -300,13 +300,11 @@ def import_label_studio():
         shutil.copy(csv_path_2, os.path.join(app.config['DOWNLOAD_FOLDER'], csv_filename_2))
 
         import_filename_1 = f'import_{csv_filename_1}.json'
-        import_filename_2 = f'import_{csv_filename_2}.json'
 
         print("Creating import file")
 
         # Setting default offset=0. The index would be the index of the csv bandpass file
         create_import_file(import_filename_1, csv_path_1, csv_filename_1, mp4_filename, sensor=1, sensor_offset=0)
-        create_import_file(import_filename_2, csv_path_2, csv_filename_2, mp4_filename, sensor=2, sensor_offset=0)
 
         return redirect(url_for('final_instruction'))
     
