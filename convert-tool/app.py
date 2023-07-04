@@ -163,14 +163,6 @@ def list_upload():
             }
         ]
     )
-    # with CwaData(cwa_file_1, include_gyro=False, include_temperature=True) as cwa_data_1, \
-    #     CwaData(cwa_file_2, include_gyro=False, include_temperature=True) as cwa_data_2: #Convert cwa format into ndarray
-    #     # As a pandas DataFrame
-    #     samples_1 = cwa_data_1.get_samples()
-    #     samples_2 = cwa_data_2.get_samples()
-
-    #     time_min, time_max = (samples['time'].min(), samples['time'].max())
-    #     print('time_min, time_max', time_min, time_max)
 
 """
 Read data from cwa path, output result to csv path wrt the filtered date from request
@@ -206,24 +198,9 @@ def process_csv(cwa_path, csv_path, start_date, start_time, end_date, end_time):
         start_row_index = samples[samples['time'] >= start_datetime].index[0]
         end_row_index = samples[samples['time'] > end_datetime].index[0]
 
-        # import IPython ; IPython.embed() 
         selected_sensor_data = sensor_data[start_row_index:end_row_index,0:4]
 
         AX3_application, AX3Data, AX3Data_Bandpass, sleep_period_time_hr, bedtime, NWT_hr = ExtractData(selected_sensor_data, 1,participant_id,starting_hour) 
-
-        # for DaySequence in range(1, NumofDay+1): #DaySequence is not in zero indexing to avoid confusion
-        #     # print('Processing---Participant ID:',participant_id,'---Day',DaySequence,'of', NumofDay, ' ---',len(file_list)-1,'more participant(s) remaining')
-        #     dayStartRowIndex=bisect.bisect_left(sensor_data_time, sensor_data_time[0]+(DaySequence-1)*60*60*24)
-        #     #Index of the last Row of that 24-hour period
-        #     dayLastRowIndex=bisect.bisect_left(sensor_data_time, sensor_data_time[0]+(DaySequence)*60*60*24-1)
-        #     day_sensor_data=sensor_data[dayStartRowIndex:dayLastRowIndex,0:4]
-        #     # Extract AX3 data & DC-block removed VM
-        #     AX3_application, AX3Data, AX3Data_Bandpass, sleep_period_time_hr, bedtime,NWT_hr = ExtractData(day_sensor_data, DaySequence,participant_id,starting_hour) 
-        #     #[AX3_application, AX3Data, AX3Data_Bandpass, sleep_period_time_hr, bedtime,NWT_hr]= pickle.load(open('../../debug_6.sav', 'rb'))
-        #     print('AX3 data pre-processed')
-        #     import IPython ; IPython.embed() 
-
-        # TODO: Calculate the band pass before saving to csv
 
         result = pd.DataFrame()
 
@@ -238,13 +215,20 @@ def process_csv(cwa_path, csv_path, start_date, start_time, end_date, end_time):
     return start_row_index, end_row_index
     
 # Write content to import file
-def create_import_file(import_filename, csv_path, csv_filename, mp4_filename, sensor="unknown", sensor_offset=0):
+"""
+import_filename: name of import file
+csv_path: path to filtered csv data of sensor 1
+csv_path_2: path to filtered csv data of sensor 2
+mp4_filename: name of the mp4 file
+sensor: sensor name
+"""
+def create_import_file(import_filename, csv_path, csv_path_2, csv_filename, mp4_filename, sensor="unknown"):
     with open("./static/import_template.json") as f_template:
         template_content = f_template.read()
         import_content = template_content.replace('[[csv_filename]]', csv_filename).\
                         replace('[[mp4_filename]]', mp4_filename).\
-                        replace('[[sensor_offset]]', str(sensor_offset)).\
                         replace('[[csv_path]]', csv_path.replace('\\', '\\\\')).\
+                        replace('[[csv_path_2]]', csv_path_2.replace('\\', '\\\\')).\
                         replace('[[sensor]]', str(sensor))
         with open(os.path.join(app.config['DOWNLOAD_FOLDER'], import_filename), 'w') as fout:
             fout.write(import_content)
@@ -304,7 +288,7 @@ def import_label_studio():
         print("Creating import file")
 
         # Setting default offset=0. The index would be the index of the csv bandpass file
-        create_import_file(import_filename_1, csv_path_1, csv_filename_1, mp4_filename, sensor=1, sensor_offset=0)
+        create_import_file(import_filename_1, csv_path_1, csv_path_2, csv_filename_1, mp4_filename, sensor=1)
 
         return redirect(url_for('final_instruction'))
     
