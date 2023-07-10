@@ -93,8 +93,8 @@ def upload_file():
     
 @app.route('/download/<filename>')
 def download_file(filename):
-    print('download_file', app.config['DOWNLOAD_FOLDER'], filename)
-    return send_from_directory(app.config['DOWNLOAD_FOLDER'], filename, as_attachment=True)
+    from_directory = request.args.get('from_directory', app.config['DOWNLOAD_FOLDER'])
+    return send_from_directory(from_directory, filename, as_attachment=True)
 
 @app.route('/delete-downloads')
 def delete_download_files():
@@ -126,7 +126,11 @@ def get_time_range_from_cwa_file(cwa_file):
         samples = cwa_data.get_samples()
         time_min, time_max = (samples['time'].min(), samples['time'].max())
         return time_min, time_max
-   
+
+def get_cwa_data_from_file(cwa_file):
+    with CwaData(cwa_file, include_gyro=False, include_temperature=True) as cwa_data:
+        samples = cwa_data.get_samples()
+        return samples
 
 @app.route('/list-upload')
 def list_upload():
@@ -139,9 +143,14 @@ def list_upload():
     time_min_1, time_max_1 = get_time_range_from_cwa_file(cwa_file_1)
     time_min_2, time_max_2 = get_time_range_from_cwa_file(cwa_file_2)
 
+    cwa_data_1 = get_cwa_data_from_file(cwa_file_1)
+    cwa_data_2 = get_cwa_data_from_file(cwa_file_2)
+
     return render_template(
         'list_upload.html', 
-        files=files, 
+        mov_filename=os.path.basename(mov_file),
+        sensor1_data=cwa_data_1,
+        sensor2_data=cwa_data_2,
         date_range_1=[
             {
                 'time': time_min_1.strftime('%H:%M:%S'),
@@ -165,9 +174,17 @@ def list_upload():
     )
 
 """
+Process mov file and write to mp4 file
+"""
+def process_mov(mov_file: str, mp4_path: str, start_second: float, end_second: float):
+    video = VideoFileClip(mov_file).subclip(start_second, end_second)
+    video.write_videofile(mp4_path, codec='libx264')
+    video.close()
+
+"""
 Read data from cwa path, output result to csv path wrt the filtered date from request
 """
-def process_csv(cwa_path, csv_path, start_date, start_time, end_date, end_time):
+def process_csv(cwa_path, csv_path, start_index, end_index):
     with CwaData(cwa_path, include_gyro=False, include_temperature=True) as cwa_data: #Convert cwa format into ndarray
         # As a pandas DataFrame
         samples = cwa_data.get_samples()
@@ -175,30 +192,18 @@ def process_csv(cwa_path, csv_path, start_date, start_time, end_date, end_time):
 
         record_start_time=samples['time'][0]
 
-        sensor_data_time=sensor_data[:,0]
-        NumofDay_float=(sensor_data_time[-1]-sensor_data_time[0])/60/60/24
-
-        start_datetime = pd.to_datetime(f'{start_date} {start_time}')
-        end_datetime = pd.to_datetime(f'{end_date} {end_time}')
-
-        filtered_samples = samples[(samples['time'] >= start_datetime) & (samples['time'] <= end_datetime)]
+        filtered_samples = samples.iloc[start_index:end_index+1]
 
         if filtered_samples.shape[0] == 0:
             return "Invalid time. Please try again"
 
         #Get number of days captured in an integer
-        NumofDay=math.ceil(NumofDay_float)
         participant_id = "sample_participant"
         participant_id = participant_id.split('.')[0]  #--> Remove any extension
         #Get time
-        formatted_time = record_start_time.strftime("%Y%b%d(%a)%H:%M")
-        formatted_date = record_start_time.strftime("%Y%b%d")
         starting_hour = int(record_start_time.strftime("%H"))+int(record_start_time.strftime("%M"))/60
 
-        start_row_index = samples[samples['time'] >= start_datetime].index[0]
-        end_row_index = samples[samples['time'] > end_datetime].index[0]
-
-        selected_sensor_data = sensor_data[start_row_index:end_row_index,0:4]
+        selected_sensor_data = sensor_data[start_index:end_index+1,0:4]
 
         AX3_application, AX3Data, AX3Data_Bandpass, sleep_period_time_hr, bedtime, NWT_hr = ExtractData(selected_sensor_data, 1,participant_id,starting_hour) 
 
@@ -209,10 +214,9 @@ def process_csv(cwa_path, csv_path, start_date, start_time, end_date, end_time):
             result[f'ax3_{i}'] = AX3Data[:,i]
 
         result['ax3_bandpass'] = list(AX3Data_Bandpass)
-        result['original_index'] = [i+start_row_index for i in range(len(AX3Data))]
+        result['original_index'] = [i for i in range(len(AX3Data))]
 
         result.to_csv(csv_path, index=True, index_label='index')
-    return start_row_index, end_row_index
     
 # Write content to import file
 """
@@ -243,17 +247,12 @@ def append_datetime_prefix(filename, start_date, start_time, end_date, end_time)
 def import_label_studio():
     files = os.listdir(app.config['UPLOAD_FOLDER'])
 
-    start_date_1, start_time_1 = request.form.get('start-date-1'), request.form.get('start-time-1')
-    end_date_1, end_time_1 = request.form.get('end-date-1'), request.form.get('end-time-1')
-    start_date_2, start_time_2 = request.form.get('start-date-2'), request.form.get('start-time-2')
-    end_date_2, end_time_2 = request.form.get('end-date-2'), request.form.get('end-time-2')
-
     cwa_file_1, cwa_file_2, mov_file = find_file(files)
 
     mp4_filename = get_file_name_from_path(mov_file) + '.mp4'
-    csv_filename_1 = append_datetime_prefix(get_file_name_from_path(cwa_file_1) + '.csv', start_date_1, start_time_1, end_date_1, end_time_1)
-    csv_filename_2 = append_datetime_prefix(get_file_name_from_path(cwa_file_2) + '.csv', start_date_2, start_time_2, end_date_2, end_time_2)
-
+    csv_filename_1 = get_file_name_from_path(cwa_file_1) + '.csv'
+    csv_filename_2 = get_file_name_from_path(cwa_file_2) + '.csv'
+                      
     mp4_path = os.path.join(STORAGE_INPUT_FOLDER, mp4_filename)
     csv_path_1 = os.path.join(STORAGE_INPUT_FOLDER, csv_filename_1)
     csv_path_2 = os.path.join(STORAGE_INPUT_FOLDER, csv_filename_2)
@@ -265,12 +264,14 @@ def import_label_studio():
     print('csv_path_2', csv_path_2)
 
     try:
-        video = VideoFileClip(mov_file)
-        video.write_videofile(mp4_path, codec='libx264')
-        video.close()
+        video_start, video_end = float(request.form.get('video-start')), float(request.form.get('video-end'))
+        process_mov(mov_file, mp4_path, video_start, video_end)
+
+        sensor1_start, sensor1_end = int(request.form.get('sensor1-start')), int(request.form.get('sensor1-end'))
+        sensor2_start, sensor2_end = int(request.form.get('sensor2-start')), int(request.form.get('sensor2-end'))
         
-        process_csv(cwa_file_1, csv_path_1, start_date_1, start_time_1, end_date_1, end_time_1)
-        process_csv(cwa_file_2, csv_path_2, start_date_2, start_time_2, end_date_2, end_time_2)
+        process_csv(cwa_file_1, csv_path_1, sensor1_start, sensor1_end)
+        process_csv(cwa_file_2, csv_path_2, sensor2_start, sensor2_end)
 
         # Now, clear the download directory, 
         # then copy the result csv file and the import.json file to the download directory

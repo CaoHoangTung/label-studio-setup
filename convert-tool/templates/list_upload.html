@@ -2,8 +2,22 @@
 <html>
 <head>
     <title>List of Uploads</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .signal-chart {
+            width: 500px;
+        }
+        .canvas-region {
+            width: 100%;
+            display: flex;
+        }
+    </style>
 </head>
 <body>
+    <script>
+        let [sensor1DataX, sensor1DataY, sensor1DataZ] = [{{ sensor1_data['accel_x'].tolist() }}, {{ sensor1_data['accel_y'].tolist() }}, {{ sensor1_data['accel_z'].tolist() }}]
+        let [sensor2DataX, sensor2DataY, sensor2DataZ] = [{{ sensor2_data['accel_x'].tolist() }}, {{ sensor2_data['accel_y'].tolist() }}, {{ sensor2_data['accel_z'].tolist() }}]
+    </script>
     {% include 'navigation.html' %}
 
     <h1>Select timestamp</h1>
@@ -12,30 +26,155 @@
         <li><a href="#no-download">{{ file }}</a></li>
         {% endfor %}
     </ul>
-    <!-- <a style="color: red" href="{{ url_for('delete_upload_files')}}">x Delete all files here</a> -->
-    <br>
+
+    <script>
+        function setVideoPosition(positionType) {
+            const videoElement = document.querySelector('video');
+            const currentFrame = videoElement.currentTime * videoElement.playbackRate;
+            
+            document.getElementById(positionType).value = currentFrame
+        }
+    </script>
+
     <form action="/import" method="POST" enctype="multipart/form-data" id="uploadForm">
+        <h4>Video</h4>
+
+        <br/>
+        <video width="50%" controls>
+            <!-- <source src="http://www.w3schools.com/html/mov_bbb.mp4"/> -->
+            <source src="{{url_for('download_file', filename=mov_filename, from_directory='uploads')}}"/>
+        </video>
+
+        <div>
+            <button type="button" onclick="setVideoPosition('video-start')">Set start point</button>
+            <button type="button" onclick="setVideoPosition('video-end')">Set end point</button>
+        </div>
+
+        <div>Start position: <input name="video-start" id="video-start" value="-1"></div>
+        <div>End position: <input name="video-end" id="video-end" value="-1"></div>
+
         <h4>Sensor 1</h4>
-        <label for="start-date-1">Start:</label>
-        <input type="date" id="start-date-1" name="start-date-1" min="1970-01-01" max="2100-12-31" value={{date_range_1[0]["date"]}}>
-        <input type="time" id="start-time-1" name="start-time-1" min="00:00:00" max="23:59:59" step="1" value={{date_range_1[0]["time"]}}><br><br>
-        
-        <label for="end-date-1">End:</label>
-        <input type="date" id="end-date-1" name="end-date-1" min="1970-01-01" max="2100-12-31" value={{date_range_1[1]["date"]}}>
-        <input type="time" id="end-time-1" name="end-time-1" min="00:00:00" max="23:59:59" step="1" value={{date_range_1[1]["time"]}}><br><br>
-        
+        <div class="signal-chart">
+            <div class="canvas-region">
+                <canvas id="sensor1-x-canvas"></canvas>
+                <canvas id="sensor1-y-canvas"></canvas>
+                <canvas id="sensor1-z-canvas"></canvas>
+            </div>
+        </div>
+        <input style="width: 100%" type="range" id="timeSlider" min="0" max="{{ sensor1_data.shape[0] }}" step="1" value="0" oninput="seek(this.value, 'sensor1')"><span id="sensor1-index">0</span>
+          
+        <div>
+            <button type="button" onclick="setSensorPosition('sensor1', 'sensor1-start')">Set start point</button>
+            <button type="button" onclick="setSensorPosition('sensor1', 'sensor1-end')">Set end point</button>
+        </div>
+
+        <div>Start position: <input name="sensor1-start" id="sensor1-start" value="-1"></div>
+        <div>End position: <input name="sensor1-end" id="sensor1-end" value="-1"></div>
+
         <h4>Sensor 2</h4>
-        <label for="start-date-2">Start:</label>
-        <input type="date" id="start-date-2" name="start-date-2" min="1970-01-01" max="2100-12-31" value={{date_range_2[0]["date"]}}>
-        <input type="time" id="start-time-2" name="start-time-2" min="00:00:00" max="23:59:59" step="1" value={{date_range_2[0]["time"]}}><br><br>
-        
-        <label for="end-date-2">End:</label>
-        <input type="date" id="end-date-2" name="end-date-2" min="1970-01-01" max="2100-12-31" value={{date_range_2[1]["date"]}}>
-        <input type="time" id="end-time-2" name="end-time-2" min="00:00:00" max="23:59:59" step="1" value={{date_range_2[1]["time"]}}><br><br>
-        
-        <input type="submit" value="Create import files" id="uploadBtn">
+        <div class="signal-chart">
+            <div class="canvas-region">
+                <canvas id="sensor2-x-canvas"></canvas>
+                <canvas id="sensor2-y-canvas"></canvas>
+                <canvas id="sensor2-z-canvas"></canvas>
+            </div>
+        </div>
+        <input style="width: 100%" type="range" id="timeSlider" min="0" max="{{ sensor2_data.shape[0] }}" step="1" value="0" oninput="seek(this.value, 'sensor2')"><span id="sensor2-index">0</span>
+          
+        <div>
+            <button type="button" onclick="setSensorPosition('sensor2', 'sensor2-start')">Set start point</button>
+            <button type="button" onclick="setSensorPosition('sensor2', 'sensor2-end')">Set end point</button>
+        </div>
+
+        <div>Start position: <input name="sensor2-start" id="sensor2-start" value="-1"></div>
+        <div>End position: <input name="sensor2-end" id="sensor2-end" value="-1"></div>
+
+        <input id="uploadBtn" type="submit" width="100px" height="100px">
     </form>
     <div id="message">{{ message }}</div>
+
+    <script>
+        const WINDOW_SIZE = 100;
+
+        function setupChart(chartId, data) {
+            // Define your time series data
+            const timeSeriesData = data;
+       
+            // Get the canvas and context
+            const canvas = document.getElementById(chartId);
+            const ctx = canvas.getContext('2d');
+    
+            // Set up the chart
+            const chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({ length: WINDOW_SIZE }, (_, i) => i),
+                    datasets: [{
+                    label: chartId,
+                    data: timeSeriesData.slice(0, WINDOW_SIZE),
+                    borderColor: 'blue',
+                    backgroundColor: 'transparent'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            suggestedMin: 1,
+                            suggestedMin: -1
+                        }
+                    },
+                    animation: false
+                }
+                }
+            );
+            return {
+                chart: chart,
+                originalData: timeSeriesData
+            }
+        }
+        let [sensor1X, sensor1Y, sensor1Z] = [setupChart('sensor1-x-canvas', sensor1DataX), setupChart('sensor1-y-canvas', sensor1DataY), setupChart('sensor1-z-canvas', sensor1DataZ)];
+        let [sensor2X, sensor2Y, sensor2Z] = [setupChart('sensor2-x-canvas', sensor2DataX), setupChart('sensor2-y-canvas', sensor2DataY), setupChart('sensor2-z-canvas', sensor2DataZ)];
+
+        const sensorCharts = {
+            'sensor1': {x: sensor1X, y: sensor1Y, z: sensor1Z},
+            'sensor2': {x: sensor2X, y: sensor2Y, z: sensor2Z}
+        }
+        const sensorPosition = {
+            'sensor1': 0,
+            'sensor2': 0
+        }
+
+        // Function to update the chart with current time
+        function updateChart(sensorChart, time) {
+            const chart = sensorChart.chart;
+            const data = sensorChart.originalData;
+
+            time = parseInt(time);
+            chart.options.plugins.tooltip.enabled = false;
+            chart.options.plugins.tooltip.enabled = true;
+            chart.data.labels = Array.from({ length: WINDOW_SIZE }, (_, i) => i+time)
+            chart.data.datasets[0].data = data.slice(time, time+WINDOW_SIZE);
+            chart.update();
+        }
+
+        // Function to seek to a specific time in the animation
+        function seek(time, sensorName) {
+            updateChart(sensorCharts[sensorName].x, time);
+            updateChart(sensorCharts[sensorName].y, time);
+            updateChart(sensorCharts[sensorName].z, time);
+
+            sensorPosition[sensorName] = time;
+
+            document.getElementById(`${sensorName}-index`).innerHTML = time;
+        }
+
+        function setSensorPosition(sensorName, positionType) {
+            const currentSensorPosition = sensorPosition[sensorName];
+            document.getElementById(positionType).value = currentSensorPosition
+        }
+
+    </script>
 
     <script>
         function displayMessage(msg) {
@@ -52,5 +191,7 @@
 
         });
     </script>
+
+
 </body>
 </html>
