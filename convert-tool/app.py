@@ -19,6 +19,9 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['DOWNLOAD_FOLDER'] = DOWNLOAD_FOLDER
 app.config['STORAGE_FOLDER'] = os.environ.get('STORAGE_FOLDER', 'C:\\Users\\ADMIN\\label-studio\\data\\storage')
 
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+os.makedirs(app.config['DOWNLOAD_FOLDER'], exist_ok=True)
+
 STORAGE_INPUT_FOLDER = os.path.join(app.config['STORAGE_FOLDER'], "input")
 
 FIRST_SENSOR_PREFIX = 'sensor1_'
@@ -86,8 +89,8 @@ def upload_file():
 
     # Save the file to the upload folder
     file_mov.save(os.path.join(app.config['UPLOAD_FOLDER'], file_mov.filename))
-    file_cwa_1.save(os.path.join(app.config['UPLOAD_FOLDER'], f"{FIRST_SENSOR_PREFIX}{file_cwa_1.filename}"))
-    file_cwa_2.save(os.path.join(app.config['UPLOAD_FOLDER'], f"{SECOND_SENSOR_PREFIX}{file_cwa_2.filename}"))
+    file_cwa_1.save(os.path.join(app.config['UPLOAD_FOLDER'], f'{FIRST_SENSOR_PREFIX}{file_cwa_1.filename}'))
+    file_cwa_2.save(os.path.join(app.config['UPLOAD_FOLDER'], f'{SECOND_SENSOR_PREFIX}{file_cwa_2.filename}'))
     return redirect(url_for('list_upload'))
 
     
@@ -173,6 +176,11 @@ def list_upload():
         ]
     )
 
+def append_with_datetime_prefix(csv_path, start_datetime, end_datetime):
+    filename = os.path.basename(csv_path)
+    return os.path.join(os.path.dirname(csv_path), f'{start_datetime}-{end_datetime}-{filename}')
+
+
 """
 Process mov file and write to mp4 file
 """
@@ -194,8 +202,11 @@ def process_csv(cwa_path, csv_path, start_index, end_index):
 
         filtered_samples = samples.iloc[start_index:end_index+1]
 
-        if filtered_samples.shape[0] == 0:
-            return "Invalid time. Please try again"
+        if len(filtered_samples) == 0:
+            raise Exception("Duration too short")
+
+        selected_start_datetime =  str(filtered_samples['time'][0]).replace(' ', '_').replace('-', '_').replace(':', '_')
+        selected_end_datetime =  str(filtered_samples['time'][len(filtered_samples)-1]).replace(' ', '_').replace('-', '_').replace(':', '_')
 
         #Get number of days captured in an integer
         participant_id = "sample_participant"
@@ -217,6 +228,7 @@ def process_csv(cwa_path, csv_path, start_index, end_index):
         result['original_index'] = [i for i in range(len(AX3Data))]
 
         result.to_csv(csv_path, index=True, index_label='index')
+        return selected_start_datetime, selected_end_datetime
     
 # Write content to import file
 """
@@ -265,13 +277,14 @@ def import_label_studio():
 
     try:
         video_start, video_end = float(request.form.get('video-start')), float(request.form.get('video-end'))
+
         process_mov(mov_file, mp4_path, video_start, video_end)
 
         sensor1_start, sensor1_end = int(request.form.get('sensor1-start')), int(request.form.get('sensor1-end'))
         sensor2_start, sensor2_end = int(request.form.get('sensor2-start')), int(request.form.get('sensor2-end'))
         
-        process_csv(cwa_file_1, csv_path_1, sensor1_start, sensor1_end)
-        process_csv(cwa_file_2, csv_path_2, sensor2_start, sensor2_end)
+        sensor1_start_datetime, sensor1_end_datetime = process_csv(cwa_file_1, csv_path_1, sensor1_start, sensor1_end)
+        sensor2_start_datetime, sensor2_end_datetime = process_csv(cwa_file_2, csv_path_2, sensor2_start, sensor2_end)
 
         # Now, clear the download directory, 
         # then copy the result csv file and the import.json file to the download directory
@@ -281,8 +294,8 @@ def import_label_studio():
 
         # Copy the resulting csv file to the download directory
         print("Copying csv file to download directory")
-        shutil.copy(csv_path_1, os.path.join(app.config['DOWNLOAD_FOLDER'], csv_filename_1))
-        shutil.copy(csv_path_2, os.path.join(app.config['DOWNLOAD_FOLDER'], csv_filename_2))
+        shutil.copy(csv_path_1, os.path.join(app.config['DOWNLOAD_FOLDER'], f'{sensor1_start_datetime}-{sensor1_end_datetime}-{csv_filename_1}'))
+        shutil.copy(csv_path_2, os.path.join(app.config['DOWNLOAD_FOLDER'], f'{sensor2_start_datetime}-{sensor2_end_datetime}-{csv_filename_2}'))
 
         import_filename_1 = f'import_{csv_filename_1}.json'
 
