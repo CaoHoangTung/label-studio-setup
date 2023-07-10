@@ -201,12 +201,11 @@ def process_csv(cwa_path, csv_path, start_index, end_index):
         record_start_time=samples['time'][0]
 
         filtered_samples = samples.iloc[start_index:end_index+1]
-
         if len(filtered_samples) == 0:
             raise Exception("Duration too short")
 
-        selected_start_datetime =  str(filtered_samples['time'][0]).replace(' ', '_').replace('-', '_').replace(':', '_')
-        selected_end_datetime =  str(filtered_samples['time'][len(filtered_samples)-1]).replace(' ', '_').replace('-', '_').replace(':', '_')
+        selected_start_datetime =  str(filtered_samples.head(1).time.tolist()[0]).replace(' ', '_').replace('-', '_').replace(':', '_')
+        selected_end_datetime =  str(filtered_samples.tail(1).time.tolist()[0]).replace(' ', '_').replace('-', '_').replace(':', '_')
 
         #Get number of days captured in an integer
         participant_id = "sample_participant"
@@ -291,7 +290,6 @@ def import_label_studio():
         # Delete the upload folder together with all the files
 
         delete_and_recreate_dir(app.config['DOWNLOAD_FOLDER'])
-
         # Copy the resulting csv file to the download directory
         print("Copying csv file to download directory")
         shutil.copy(csv_path_1, os.path.join(app.config['DOWNLOAD_FOLDER'], f'{sensor1_start_datetime}-{sensor1_end_datetime}-{csv_filename_1}'))

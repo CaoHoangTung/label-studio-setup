@@ -1,3 +1,4 @@
 [submodule "label-studio"]
 	path = label-studio
 	url = https://github.com/CaoHoangTung/label-studio
+	branch = develop
