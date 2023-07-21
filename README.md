@@ -27,9 +27,24 @@ Now you have successfully installed Docker on your machine. We will now setup La
 
 ### First time setup
 
-1. Download the `setup-windows.bat` file in the `scripts` directory.
+#### Windows
+
+1. Navigate to the `setup-windows.bat` file in the `scripts` directory.
 
 2. Double click the `setup-windows.bat` file to run the setup. It might take a couple of minutes for the installation to complete.
+
+3. Verify that the command window show the message `App has been setup successfully`.
+
+#### MacOS or Linux
+
+1. Navigate to the `setup.sh` file in the `scripts` directory.
+
+2. Open the terminal and access the `scripts` directory. For example, if you extract the app at `Downloads`, then type the following commands in the terminal, then press enter
+```bash
+cd ~/Downloads/label-studio-setup/scripts
+chmod +x setup.sh
+bash setup.sh
+```
 
 3. Verify that the command window show the message `App has been setup successfully`.
 
