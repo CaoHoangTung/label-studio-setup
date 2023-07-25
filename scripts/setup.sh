@@ -21,7 +21,7 @@ echo "Removing existing Label Studio installation..."
 docker stop label_studio
 docker rm label_studio
 
-docker build -t heartexlabs/label-studio:latest ../label-studio
+docker build --no-cache -t heartexlabs/label-studio:latest ../label-studio
 
 LABEL_STUDIO_LOCAL_FILES_DOCUMENT_ROOT="/label-studio/data"
 
