@@ -11,12 +11,31 @@
             width: 100%;
             display: flex;
         }
+        input[type=range][orient=vertical] {
+            writing-mode: bt-lr; /* IE */
+            -webkit-appearance: slider-vertical; /* Chromium */
+            width: 8px;
+            height: 175px;
+            padding: 0 5px;
+        }
     </style>
 </head>
 <body>
     <script>
-        let [sensor1DataX, sensor1DataY, sensor1DataZ] = [{{ sensor1_data['accel_x'].tolist() }}, {{ sensor1_data['accel_y'].tolist() }}, {{ sensor1_data['accel_z'].tolist() }}]
-        let [sensor2DataX, sensor2DataY, sensor2DataZ] = [{{ sensor2_data['accel_x'].tolist() }}, {{ sensor2_data['accel_y'].tolist() }}, {{ sensor2_data['accel_z'].tolist() }}]
+        const sensorData = {
+            'sensor1': {
+                x: {{ sensor1_data['accel_x'].tolist() }},
+                y: {{ sensor1_data['accel_y'].tolist() }},
+                z: {{ sensor1_data['accel_z'].tolist() }},
+                time: {{ sensor1_data['time'].tolist() | tojson | safe }}
+            },
+            'sensor2': {
+                x: {{ sensor2_data['accel_x'].tolist() }},
+                y: {{ sensor2_data['accel_y'].tolist() }},
+                z: {{ sensor2_data['accel_z'].tolist() }},
+                time: {{ sensor2_data['time'].tolist() | tojson | safe }}
+            }
+        };
     </script>
     {% include 'navigation.html' %}
 
@@ -56,13 +75,18 @@
         <h4>Sensor 1</h4>
         <div class="signal-chart">
             <div class="canvas-region">
+                <input type="range" orient="vertical" min="1" max="10" value="3" oninput="updateChartScale('sensor1', this.value)"/>
                 <canvas id="sensor1-x-canvas"></canvas>
                 <canvas id="sensor1-y-canvas"></canvas>
                 <canvas id="sensor1-z-canvas"></canvas>
             </div>
         </div>
-        <input style="width: 100%" type="range" id="timeSlider" min="0" max="{{ sensor1_data.shape[0] }}" step="1" value="0" oninput="seek(this.value, 'sensor1')"><span id="sensor1-index">0</span>
-          
+        <input style="width: 100%" type="range" id="sensor1-timeSlider" min="0" max="{{ sensor1_data.shape[0] }}" step="1" value="0" oninput="seek(parseInt(this.value), 'sensor1')"><span id="sensor1-index">0</span>
+        <br/>
+        <button type="button" onmousedown="startSeekStepInterval(-50, 'sensor1')" onmouseup="stopSeekStepInterval('sensor1')" onmouseleave="stopSeekStepInterval('sensor1')">&lt;&lt;</button>
+        <button type="button" onmousedown="startSeekStepInterval(-1, 'sensor1')" onmouseup="stopSeekStepInterval('sensor1')" onmouseleave="stopSeekStepInterval('sensor1')">&lt;</button>
+        <button type="button" onmousedown="startSeekStepInterval(1, 'sensor1')" onmouseup="stopSeekStepInterval('sensor1')" onmouseleave="stopSeekStepInterval('sensor1')">&gt;</button>
+        <button type="button" onmousedown="startSeekStepInterval(50, 'sensor1')" onmouseup="stopSeekStepInterval('sensor1')" onmouseleave="stopSeekStepInterval('sensor1')">&gt;&gt;</button>
         <div>
             <button type="button" onclick="setSensorPosition('sensor1', 'sensor1-start')">Set start point</button>
             <button type="button" onclick="setSensorPosition('sensor1', 'sensor1-end')">Set end point</button>
@@ -74,13 +98,19 @@
         <h4>Sensor 2</h4>
         <div class="signal-chart">
             <div class="canvas-region">
+                <input type="range" orient="vertical" min="1" max="10" value="3" oninput="updateChartScale('sensor2', this.value)"/>
                 <canvas id="sensor2-x-canvas"></canvas>
                 <canvas id="sensor2-y-canvas"></canvas>
                 <canvas id="sensor2-z-canvas"></canvas>
             </div>
         </div>
-        <input style="width: 100%" type="range" id="timeSlider" min="0" max="{{ sensor2_data.shape[0] }}" step="1" value="0" oninput="seek(this.value, 'sensor2')"><span id="sensor2-index">0</span>
-          
+        <input style="width: 100%" type="range" id="sensor2-timeSlider" min="0" max="{{ sensor2_data.shape[0] }}" step="1" value="0" oninput="seek(parseInt(this.value), 'sensor2')"><span id="sensor2-index">0</span>
+        <br/>
+        <button type="button" onmousedown="startSeekStepInterval(-50, 'sensor2')" onmouseup="stopSeekStepInterval('sensor2')" onmouseleave="stopSeekStepInterval('sensor2')">&lt;&lt;</button>
+        <button type="button" onmousedown="startSeekStepInterval(-1, 'sensor2')" onmouseup="stopSeekStepInterval('sensor2')" onmouseleave="stopSeekStepInterval('sensor2')">&lt;</button>
+        <button type="button" onmousedown="startSeekStepInterval(1, 'sensor2')" onmouseup="stopSeekStepInterval('sensor2')" onmouseleave="stopSeekStepInterval('sensor2')">&gt;</button>
+        <button type="button" onmousedown="startSeekStepInterval(50, 'sensor2')" onmouseup="stopSeekStepInterval('sensor2')" onmouseleave="stopSeekStepInterval('sensor2')">&gt;&gt;</button>
+        
         <div>
             <button type="button" onclick="setSensorPosition('sensor2', 'sensor2-start')">Set start point</button>
             <button type="button" onclick="setSensorPosition('sensor2', 'sensor2-end')">Set end point</button>
@@ -94,9 +124,63 @@
     <div id="message">{{ message }}</div>
 
     <script>
-        const WINDOW_SIZE = 100;
+        function findMin(array) {
+            let result = array[0];
+            for (let item of array) {
+                result = Math.min(result, item)
+            }
+            return result;
+        }
+        function findMax(array) {
+            let result = array[0];
+            for (let item of array) {
+                result = Math.max(result, item)
+            }
+            return result;
+        }
+    </script>
 
-        function setupChart(chartId, data) {
+    <script>
+        const WINDOW_SIZE = 100;
+        
+        const label = (tooltipItem, sensorName) => {
+            const actualDataIndex = parseInt(tooltipItem.label)
+            let footerContent = '';
+            console.log(tooltipItem)
+            footerContent += tooltipItem.formattedValue + ' | ';
+            footerContent += sensorData[sensorName].time[actualDataIndex];
+            // tooltipItems.forEach(function(tooltipItem) {
+            //     const actualDataIndex = parseInt(tooltipItem.label);
+            //     footerContent += sensorData[sensorName].time[actualDataIndex] + '\n';
+            // });
+            footerContent += '';
+
+            return footerContent;
+        };
+
+        function createChartOption(sensorName, scale) {
+            return {
+                responsive: true,
+                scales: {
+                    y: {
+                        suggestedMax: scale,
+                        suggestedMin: -scale
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: (tooltipItem) => label(tooltipItem, sensorName),
+                        }
+                    }
+                },
+                animation: false
+            }
+        }
+
+        function setupChart(chartId, data, sensorName) {
+            console.log("setupChart", chartId)
+            console.log(data);
             // Define your time series data
             const timeSeriesData = data;
        
@@ -110,31 +194,45 @@
                 data: {
                     labels: Array.from({ length: WINDOW_SIZE }, (_, i) => i),
                     datasets: [{
-                    label: chartId,
-                    data: timeSeriesData.slice(0, WINDOW_SIZE),
-                    borderColor: 'blue',
-                    backgroundColor: 'transparent'
+                        label: chartId,
+                        data: timeSeriesData.slice(0, WINDOW_SIZE),
+                        borderColor: 'blue',
+                        backgroundColor: 'transparent'
                     }]
                 },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: {
-                            suggestedMin: 1,
-                            suggestedMin: -1
-                        }
-                    },
-                    animation: false
-                }
-                }
-            );
+                options: createChartOption(sensorName, 3)
+            });
             return {
                 chart: chart,
                 originalData: timeSeriesData
             }
         }
-        let [sensor1X, sensor1Y, sensor1Z] = [setupChart('sensor1-x-canvas', sensor1DataX), setupChart('sensor1-y-canvas', sensor1DataY), setupChart('sensor1-z-canvas', sensor1DataZ)];
-        let [sensor2X, sensor2Y, sensor2Z] = [setupChart('sensor2-x-canvas', sensor2DataX), setupChart('sensor2-y-canvas', sensor2DataY), setupChart('sensor2-z-canvas', sensor2DataZ)];
+
+        function updateChartScale(sensorName, newScale) {
+            // New scale configuration
+            var newScaleOptions = createChartOption(sensorName, newScale);
+
+            // Update the chart's options with the new scale options
+            for (let key in sensorCharts[sensorName]) {
+                const chart = sensorCharts[sensorName][key].chart;
+                console.log("Updating", chart)
+
+                // Update the chart to reflect the changes
+                chart.config.options = newScaleOptions;
+                chart.update();
+            }
+        }
+
+        let [sensor1X, sensor1Y, sensor1Z] = [
+            setupChart('sensor1-x-canvas', sensorData['sensor1'].x, 'sensor1'), 
+            setupChart('sensor1-y-canvas', sensorData['sensor1'].y, 'sensor1'), 
+            setupChart('sensor1-z-canvas', sensorData['sensor1'].z, 'sensor1')
+        ];
+        let [sensor2X, sensor2Y, sensor2Z] = [
+            setupChart('sensor2-x-canvas', sensorData['sensor2'].x, 'sensor2'), 
+            setupChart('sensor2-y-canvas', sensorData['sensor2'].y, 'sensor2'), 
+            setupChart('sensor2-z-canvas', sensorData['sensor2'].z, 'sensor2')
+        ];
 
         const sensorCharts = {
             'sensor1': {x: sensor1X, y: sensor1Y, z: sensor1Z},
@@ -167,6 +265,30 @@
             sensorPosition[sensorName] = time;
 
             document.getElementById(`${sensorName}-index`).innerHTML = time;
+        }
+
+        const sensorActions = {
+            "sensor1": {},
+            "sensor2": {}
+        }
+
+        function startSeekStepInterval(step, sensorName) {
+            seekStep(step, sensorName);
+            sensorActions[sensorName].interval = setInterval(() => {seekStep(step, sensorName)}, 100)
+        }
+
+        function stopSeekStepInterval(sensorName) {
+            clearInterval(sensorActions[sensorName].interval)
+        }
+
+        function seekStep(step, sensorName) {
+            console.log('seekStep', step, sensorName)
+            console.log('current position', sensorPosition[sensorName])
+            let newTime = sensorPosition[sensorName] + step;
+            newTime = Math.max(0, newTime);
+            newTime = Math.min(newTime, sensorData[sensorName].x.length)
+            document.getElementById(`${sensorName}-timeSlider`).value = newTime;
+            seek(newTime, sensorName)
         }
 
         function setSensorPosition(sensorName, positionType) {

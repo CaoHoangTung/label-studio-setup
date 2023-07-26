@@ -143,9 +143,6 @@ def list_upload():
     if cwa_file_1 is None or cwa_file_2 is None or mov_file is None:
         return render_template('list_upload.html', files=files, message='Cannot find cwa and mov file. Please go back to home page and try again')
 
-    time_min_1, time_max_1 = get_time_range_from_cwa_file(cwa_file_1)
-    time_min_2, time_max_2 = get_time_range_from_cwa_file(cwa_file_2)
-
     cwa_data_1 = get_cwa_data_from_file(cwa_file_1)
     cwa_data_2 = get_cwa_data_from_file(cwa_file_2)
 
@@ -154,26 +151,6 @@ def list_upload():
         mov_filename=os.path.basename(mov_file),
         sensor1_data=cwa_data_1,
         sensor2_data=cwa_data_2,
-        date_range_1=[
-            {
-                'time': time_min_1.strftime('%H:%M:%S'),
-                'date': time_min_1.strftime('%Y-%m-%d')
-            },
-            {
-                'time': time_max_1.strftime('%H:%M:%S'),
-                'date': time_max_1.strftime('%Y-%m-%d')
-            }
-        ],
-        date_range_2=[
-            {
-                'time': time_min_2.strftime('%H:%M:%S'),
-                'date': time_min_2.strftime('%Y-%m-%d')
-            },
-            {
-                'time': time_max_2.strftime('%H:%M:%S'),
-                'date': time_max_2.strftime('%Y-%m-%d')
-            }
-        ]
     )
 
 def append_with_datetime_prefix(csv_path, start_datetime, end_datetime):
