@@ -41,7 +41,7 @@ def find_file(file_list):
                 cwa_file_1 =  os.path.join(app.config['UPLOAD_FOLDER'], file)
             elif file.startswith(SECOND_SENSOR_PREFIX):
                 cwa_file_2 = os.path.join(app.config['UPLOAD_FOLDER'], file)
-        elif pathlib.Path(file).suffix.lower() == '.mov':
+        elif pathlib.Path(file).suffix.lower() == '.mp4':
             mov_file = os.path.join(app.config['UPLOAD_FOLDER'], file)
     return cwa_file_1, cwa_file_2, mov_file
 
@@ -88,7 +88,14 @@ def upload_file():
     delete_and_recreate_dir(app.config['DOWNLOAD_FOLDER'])
 
     # Save the file to the upload folder
-    file_mov.save(os.path.join(app.config['UPLOAD_FOLDER'], file_mov.filename))
+    mov_path = os.path.join(app.config['UPLOAD_FOLDER'], file_mov.filename)
+    file_mov.save(mov_path)
+
+    # Convert to mp4
+    mp4_path = os.path.join(app.config['UPLOAD_FOLDER'], os.path.splitext(file_mov.filename)[0]+'.mp4')
+    process_mov(mov_path, mp4_path)
+    
+    # Save signal files
     file_cwa_1.save(os.path.join(app.config['UPLOAD_FOLDER'], f'{FIRST_SENSOR_PREFIX}{file_cwa_1.filename}'))
     file_cwa_2.save(os.path.join(app.config['UPLOAD_FOLDER'], f'{SECOND_SENSOR_PREFIX}{file_cwa_2.filename}'))
     return redirect(url_for('list_upload'))
@@ -161,8 +168,10 @@ def append_with_datetime_prefix(csv_path, start_datetime, end_datetime):
 """
 Process mov file and write to mp4 file
 """
-def process_mov(mov_file: str, mp4_path: str, start_second: float, end_second: float):
-    video = VideoFileClip(mov_file).subclip(start_second, end_second)
+def process_mov(mov_file: str, mp4_path: str, start_second: float = None, end_second: float = None):
+    video = VideoFileClip(mov_file)
+    if start_second and end_second:
+        video = video.subclip(start_second, end_second)
     video.write_videofile(mp4_path, codec='libx264')
     video.close()
 
