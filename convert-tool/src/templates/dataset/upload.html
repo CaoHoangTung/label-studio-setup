@@ -1,0 +1,100 @@
+{% extends "layout/layout.html" %} {% block title %}Upload Dataset{% endblock %}
+{% block content %}
+<h1>Upload MOV + CWA File</h1>
+<form
+  method="POST"
+  enctype="multipart/form-data"
+  id="uploadForm"
+  class="max-w-[500px]"
+>
+  <ol class="list-decimal list-inside space-y-6 px-0">
+    <li class="list-item px-0">
+      <label
+        class="mb-2 text-sm font-medium text-gray-900 dark:text-white"
+        for="file_mov"
+      >
+        Choose a MOV file
+      </label>
+      <input
+        id="file_mov"
+        type="file"
+        name="file_mov"
+        accept=".mov"
+        required="true"
+        class="file-input w-full"
+      />
+    </li>
+
+    <li class="list-item px-0">
+      <label
+        class="mb-2 text-sm font-medium text-gray-900 dark:text-white"
+        for="file_cwa_1"
+      >
+        Choose a CWA file of first sensor
+      </label>
+      <input
+        id="file_cwa_1"
+        type="file"
+        name="file_cwa_1"
+        accept=".cwa"
+        class="file-input w-full"
+        required
+      />
+    </li>
+
+    <li class="list-item px-0">
+      <label
+        class="mb-2 text-sm font-medium text-gray-900 dark:text-white"
+        for="file_cwa_2"
+      >
+        Choose a CWA file of second sensor
+      </label>
+      <input
+        id="file_cwa_2"
+        type="file"
+        name="file_cwa_2"
+        accept=".cwa"
+        class="file-input w-full"
+        required
+      />
+    </li>
+    <input
+      type="submit"
+      value="Upload"
+      id="uploadBtn"
+      class="btn btn-primary"
+    />
+  </ol>
+</form>
+{% include 'layout/toast.html' %}
+<script>
+  function displayMessage(msg) {
+    document.getElementById("message").innerText = msg;
+  }
+
+  document
+    .getElementById("uploadBtn")
+    .addEventListener("click", function (event) {
+      event.preventDefault();
+      let file_mov = document.getElementById("file_mov");
+      let file_cwa_1 = document.getElementById("file_cwa_1");
+      let file_cwa_2 = document.getElementById("file_cwa_2");
+
+      if (
+        file_mov.files.length === 0 ||
+        file_cwa_1.files.length === 0 ||
+        file_cwa_2.files.length === 0
+      ) {
+        showWarningToast("You must upload a mov and 2 cwa files");
+      } else {
+        this.disabled = true;
+        let message = document.createElement("p");
+        showInfoToast(
+          "Uploading file, please do not turn off the browser. Once finished, you would have to select the interest time duration and import into Label studio",
+        );
+        document.getElementById("uploadForm").submit();
+      }
+    });
+</script>
+
+{% endblock %}

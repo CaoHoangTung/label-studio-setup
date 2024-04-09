@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>List of Downloads</title>
+</head>
+<body>
+<h1 class="prose lg:prose-xl">List of Downloads</h1>
+<ul class="row">
+    {% for file in files %}
+        <li>
+            <a href="{{ url_for('download_file', filename=file) }}" download>{{ file }}</a>
+        </li>
+    {% endfor %}
+</ul>
+<a style="color: red" href="{{ url_for('dataset_delete') }}">x Delete all files here</a>
+</body>
+</html>

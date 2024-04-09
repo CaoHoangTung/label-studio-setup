@@ -9,12 +9,15 @@ Example:
 import argparse
 from openmovement.load import CwaData
 
-#Convert cwa format into ndarray
+
+# Convert cwa format into ndarray
 def process_file(args):
-    with CwaData(args.input, include_gyro=False, include_temperature=True) as cwa_data: #Convert cwa format into ndarray
+    with CwaData(args.input, include_gyro=False,
+                 include_temperature=True) as cwa_data:  # Convert cwa format into ndarray
         # As a pandas DataFrame
         samples = cwa_data.get_samples()
         samples.to_csv(args.output, index=True, index_label='index')
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Process input file and write the result to an output file.')

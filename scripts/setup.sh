@@ -9,6 +9,8 @@ echo "Installing Label Studio"
 
 LOCAL_DATA_PATH="$HOME/label-studio/data"
 LOCAL_STORAGE_PATH="$LOCAL_DATA_PATH/storage"
+LOCAL_FRONTEND_PATH="./frontend"
+
 echo "Setting LOCAL_DATA_PATH=$LOCAL_DATA_PATH"
 echo "Setting LOCAL_STORAGE_PATH=$LOCAL_STORAGE_PATH"
 
@@ -33,6 +35,7 @@ docker run \
 --restart always \
 -p 8080:8080 \
 -v "$LOCAL_DATA_PATH":"$LABEL_STUDIO_LOCAL_FILES_DOCUMENT_ROOT" \
+-v "$LOCAL_FRONTEND_PATH":"/label-studio/frontend/lsf" \
 heartexlabs/label-studio:latest \
 label-studio start UpwatchSegmentation \
 --init --no-browser --username upwatcher@gmail.com --password upwatch \

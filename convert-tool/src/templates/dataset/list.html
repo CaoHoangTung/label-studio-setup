@@ -1,0 +1,27 @@
+{% extends "layout/layout.html" %} {% block title %}Dataset List{% endblock %}
+{% block content %}
+
+<h1>List of Dataset</h1>
+{% if datasets | length > 0 %}
+<ul class="max-w-md divide-y divide-gray-200 dark:divide-gray-700">
+  {% for dataset in datasets %}
+  <li class="">
+    <a href="{{ url_for('dataset', dataset=dataset) }}">{{ dataset }}</a>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<div
+  class="text-red-700 flex flex-col justify-center items-center min-h-[200px] space-y-4"
+>
+  <iconify-icon icon="ph:empty-duotone" class="text-6xl"></iconify-icon>
+  <h3 class="m-0">No dataset uploaded yet.</h3>
+  <a class="cursor-pointer" href="{{ url_for('dataset_upload') }}">
+    <button
+      class="bg-sky-500 hover:bg-sky-700 px-4 py-2 rounded text-white transition cursor-pointer"
+    >
+      Upload now
+    </button>
+  </a>
+</div>
+{% endif %} {% endblock %}

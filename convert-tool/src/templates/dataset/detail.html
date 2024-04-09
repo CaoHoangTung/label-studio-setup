@@ -1,0 +1,441 @@
+{% extends "layout/layout.html" %} {% block title %} List of Uploads {% endblock
+%} {% block extra_header %}
+<title>List of Uploads</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  .signal-chart {
+    width: 500px;
+  }
+
+  .canvas-region {
+    width: 100%;
+    display: flex;
+  }
+
+  input[type="range"][orient="vertical"] {
+    writing-mode: bt-lr; /* IE */
+    -webkit-appearance: slider-vertical; /* Chromium */
+    width: 8px;
+    height: 175px;
+    padding: 0 5px;
+  }
+</style>
+
+<script>
+  const sensorData = {
+      'sensor1': {
+          x: {{ sensor1_data['accel_x'].tolist() }},
+          y: {{ sensor1_data['accel_y'].tolist() }},
+          z: {{ sensor1_data['accel_z'].tolist() }},
+          time: {{ sensor1_data['time'].tolist() | tojson | safe }}
+      },
+      'sensor2': {
+          x: {{ sensor2_data['accel_x'].tolist() }},
+          y: {{ sensor2_data['accel_y'].tolist() }},
+          z: {{ sensor2_data['accel_z'].tolist() }},
+          time: {{ sensor2_data['time'].tolist() | tojson | safe }}
+      }
+  };
+</script>
+{% endblock %} {% block content %}
+
+<h1>Select timestamp</h1>
+<ul>
+  {% for file in files %}
+  <li><a href="#no-download">{{ file }}</a></li>
+  {% endfor %}
+</ul>
+
+<script>
+  function setVideoPosition(positionType) {
+    const videoElement = document.querySelector("video");
+    const currentFrame = videoElement.currentTime * videoElement.playbackRate;
+
+    document.getElementById(positionType).value = currentFrame;
+  }
+</script>
+
+<form
+  action="/import"
+  method="POST"
+  enctype="multipart/form-data"
+  id="uploadForm"
+>
+  <h4>Video</h4>
+
+  <br />
+  <video width="50%" controls>
+    <!-- <source src="http://www.w3schools.com/html/mov_bbb.mp4"/> -->
+    <source
+      src="{{ url_for('download_file', filename=mp4_file, from_directory='uploads') }}"
+    />
+  </video>
+
+  <div>
+    <button type="button" onclick="setVideoPosition('video-start')">
+      Set start point
+    </button>
+    <button type="button" onclick="setVideoPosition('video-end')">
+      Set end point
+    </button>
+  </div>
+
+  <div>
+    Start position: <input name="video-start" id="video-start" value="-1" />
+  </div>
+  <div>End position: <input name="video-end" id="video-end" value="-1" /></div>
+
+  <h4>Sensor 1</h4>
+  <div class="signal-chart">
+    <div class="canvas-region">
+      <input
+        type="range"
+        orient="vertical"
+        min="1"
+        max="10"
+        value="3"
+        oninput="updateChartScale('sensor1', this.value)"
+      />
+      <canvas id="sensor1-x-canvas"></canvas>
+      <canvas id="sensor1-y-canvas"></canvas>
+      <canvas id="sensor1-z-canvas"></canvas>
+    </div>
+  </div>
+  <input
+    style="width: 100%"
+    type="range"
+    id="sensor1-timeSlider"
+    min="0"
+    max="{{ sensor1_data.shape[0] }}"
+    step="1"
+    value="0"
+    oninput="seek(parseInt(this.value), 'sensor1')"
+  /><span id="sensor1-index">0</span>
+  <br />
+  <button
+    type="button"
+    onmousedown="startSeekStepInterval(-50, 'sensor1')"
+    onmouseup="stopSeekStepInterval('sensor1')"
+    onmouseleave="stopSeekStepInterval('sensor1')"
+  >
+    &lt;&lt;
+  </button>
+  <button
+    type="button"
+    onmousedown="startSeekStepInterval(-1, 'sensor1')"
+    onmouseup="stopSeekStepInterval('sensor1')"
+    onmouseleave="stopSeekStepInterval('sensor1')"
+  >
+    &lt;
+  </button>
+  <button
+    type="button"
+    onmousedown="startSeekStepInterval(1, 'sensor1')"
+    onmouseup="stopSeekStepInterval('sensor1')"
+    onmouseleave="stopSeekStepInterval('sensor1')"
+  >
+    &gt;
+  </button>
+  <button
+    type="button"
+    onmousedown="startSeekStepInterval(50, 'sensor1')"
+    onmouseup="stopSeekStepInterval('sensor1')"
+    onmouseleave="stopSeekStepInterval('sensor1')"
+  >
+    &gt;&gt;
+  </button>
+  <div>
+    <button
+      type="button"
+      onclick="setSensorPosition('sensor1', 'sensor1-start')"
+    >
+      Set start point
+    </button>
+    <button type="button" onclick="setSensorPosition('sensor1', 'sensor1-end')">
+      Set end point
+    </button>
+  </div>
+
+  <div>
+    Start position:
+    <input name="sensor1-start" id="sensor1-start" value="-1" />
+  </div>
+  <div>
+    End position: <input name="sensor1-end" id="sensor1-end" value="-1" />
+  </div>
+
+  <h4>Sensor 2</h4>
+  <div class="signal-chart">
+    <div class="canvas-region">
+      <input
+        type="range"
+        orient="vertical"
+        min="1"
+        max="10"
+        value="3"
+        oninput="updateChartScale('sensor2', this.value)"
+      />
+      <canvas id="sensor2-x-canvas"></canvas>
+      <canvas id="sensor2-y-canvas"></canvas>
+      <canvas id="sensor2-z-canvas"></canvas>
+    </div>
+  </div>
+  <input
+    style="width: 100%"
+    type="range"
+    id="sensor2-timeSlider"
+    min="0"
+    max="{{ sensor2_data.shape[0] }}"
+    step="1"
+    value="0"
+    oninput="seek(parseInt(this.value), 'sensor2')"
+  /><span id="sensor2-index">0</span>
+  <br />
+  <button
+    type="button"
+    onmousedown="startSeekStepInterval(-50, 'sensor2')"
+    onmouseup="stopSeekStepInterval('sensor2')"
+    onmouseleave="stopSeekStepInterval('sensor2')"
+  >
+    &lt;&lt;
+  </button>
+  <button
+    type="button"
+    onmousedown="startSeekStepInterval(-1, 'sensor2')"
+    onmouseup="stopSeekStepInterval('sensor2')"
+    onmouseleave="stopSeekStepInterval('sensor2')"
+  >
+    &lt;
+  </button>
+  <button
+    type="button"
+    onmousedown="startSeekStepInterval(1, 'sensor2')"
+    onmouseup="stopSeekStepInterval('sensor2')"
+    onmouseleave="stopSeekStepInterval('sensor2')"
+  >
+    &gt;
+  </button>
+  <button
+    type="button"
+    onmousedown="startSeekStepInterval(50, 'sensor2')"
+    onmouseup="stopSeekStepInterval('sensor2')"
+    onmouseleave="stopSeekStepInterval('sensor2')"
+  >
+    &gt;&gt;
+  </button>
+
+  <div>
+    <button
+      type="button"
+      onclick="setSensorPosition('sensor2', 'sensor2-start')"
+    >
+      Set start point
+    </button>
+    <button type="button" onclick="setSensorPosition('sensor2', 'sensor2-end')">
+      Set end point
+    </button>
+  </div>
+
+  <div>
+    Start position:
+    <input name="sensor2-start" id="sensor2-start" value="-1" />
+  </div>
+  <div>
+    End position: <input name="sensor2-end" id="sensor2-end" value="-1" />
+  </div>
+
+  <input id="uploadBtn" type="submit" width="100px" height="100px" />
+</form>
+<div id="message">{{ message }}</div>
+
+<script>
+  function findMin(array) {
+    let result = array[0];
+    for (let item of array) {
+      result = Math.min(result, item);
+    }
+    return result;
+  }
+
+  function findMax(array) {
+    let result = array[0];
+    for (let item of array) {
+      result = Math.max(result, item);
+    }
+    return result;
+  }
+</script>
+
+<script>
+  const WINDOW_SIZE = 100;
+
+  const label = (tooltipItem, sensorName) => {
+    const actualDataIndex = parseInt(tooltipItem.label);
+    let footerContent = "";
+    footerContent += tooltipItem.formattedValue + " | ";
+    footerContent += sensorData[sensorName].time[actualDataIndex];
+    footerContent += "";
+
+    return footerContent;
+  };
+
+  function createChartOption(sensorName, scale) {
+    return {
+      responsive: true,
+      scales: {
+        y: {
+          suggestedMax: scale,
+          suggestedMin: -scale,
+        },
+      },
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: (tooltipItem) => label(tooltipItem, sensorName),
+          },
+        },
+      },
+      animation: false,
+    };
+  }
+
+  function setupChart(chartId, data, sensorName) {
+    console.log("setupChart", chartId);
+    console.log(data);
+    // Define your time series data
+    const timeSeriesData = data;
+
+    // Get the canvas and context
+    const canvas = document.getElementById(chartId);
+    const ctx = canvas.getContext("2d");
+
+    // Set up the chart
+    const chart = new Chart(ctx, {
+      type: "line",
+      data: {
+        labels: Array.from({ length: WINDOW_SIZE }, (_, i) => i),
+        datasets: [
+          {
+            label: chartId,
+            data: timeSeriesData.slice(0, WINDOW_SIZE),
+            borderColor: "blue",
+            backgroundColor: "transparent",
+          },
+        ],
+      },
+      options: createChartOption(sensorName, 3),
+    });
+    return {
+      chart: chart,
+      originalData: timeSeriesData,
+    };
+  }
+
+  function updateChartScale(sensorName, newScale) {
+    // New scale configuration
+    var newScaleOptions = createChartOption(sensorName, newScale);
+
+    // Update the chart's options with the new scale options
+    for (let key in sensorCharts[sensorName]) {
+      const chart = sensorCharts[sensorName][key].chart;
+      console.log("Updating", chart);
+
+      // Update the chart to reflect the changes
+      chart.config.options = newScaleOptions;
+      chart.update();
+    }
+  }
+
+  let [sensor1X, sensor1Y, sensor1Z] = [
+    setupChart("sensor1-x-canvas", sensorData["sensor1"].x, "sensor1"),
+    setupChart("sensor1-y-canvas", sensorData["sensor1"].y, "sensor1"),
+    setupChart("sensor1-z-canvas", sensorData["sensor1"].z, "sensor1"),
+  ];
+  let [sensor2X, sensor2Y, sensor2Z] = [
+    setupChart("sensor2-x-canvas", sensorData["sensor2"].x, "sensor2"),
+    setupChart("sensor2-y-canvas", sensorData["sensor2"].y, "sensor2"),
+    setupChart("sensor2-z-canvas", sensorData["sensor2"].z, "sensor2"),
+  ];
+
+  const sensorCharts = {
+    sensor1: { x: sensor1X, y: sensor1Y, z: sensor1Z },
+    sensor2: { x: sensor2X, y: sensor2Y, z: sensor2Z },
+  };
+  const sensorPosition = {
+    sensor1: 0,
+    sensor2: 0,
+  };
+
+  // Function to update the chart with current time
+  function updateChart(sensorChart, time) {
+    const chart = sensorChart.chart;
+    const data = sensorChart.originalData;
+
+    time = parseInt(time);
+    chart.options.plugins.tooltip.enabled = false;
+    chart.options.plugins.tooltip.enabled = true;
+    chart.data.labels = Array.from({ length: WINDOW_SIZE }, (_, i) => i + time);
+    chart.data.datasets[0].data = data.slice(time, time + WINDOW_SIZE);
+    chart.update();
+  }
+
+  // Function to seek to a specific time in the animation
+  function seek(time, sensorName) {
+    updateChart(sensorCharts[sensorName].x, time);
+    updateChart(sensorCharts[sensorName].y, time);
+    updateChart(sensorCharts[sensorName].z, time);
+
+    sensorPosition[sensorName] = time;
+
+    document.getElementById(`${sensorName}-index`).innerHTML = time;
+  }
+
+  const sensorActions = {
+    sensor1: {},
+    sensor2: {},
+  };
+
+  function startSeekStepInterval(step, sensorName) {
+    seekStep(step, sensorName);
+    sensorActions[sensorName].interval = setInterval(() => {
+      seekStep(step, sensorName);
+    }, 100);
+  }
+
+  function stopSeekStepInterval(sensorName) {
+    clearInterval(sensorActions[sensorName].interval);
+  }
+
+  function seekStep(step, sensorName) {
+    console.log("seekStep", step, sensorName);
+    console.log("current position", sensorPosition[sensorName]);
+    let newTime = sensorPosition[sensorName] + step;
+    newTime = Math.max(0, newTime);
+    newTime = Math.min(newTime, sensorData[sensorName].x.length);
+    document.getElementById(`${sensorName}-timeSlider`).value = newTime;
+    seek(newTime, sensorName);
+  }
+
+  function setSensorPosition(sensorName, positionType) {
+    const currentSensorPosition = sensorPosition[sensorName];
+    document.getElementById(positionType).value = currentSensorPosition;
+  }
+</script>
+
+{% include 'layout/toast.html' %}
+<script>
+  document
+    .getElementById("uploadBtn")
+    .addEventListener("click", function (event) {
+      event.preventDefault();
+
+      this.disabled = true;
+      let message = document.createElement("p");
+      showInfoToast(
+        "Processing files, please do not turn off the browser. If the files are large, this operation may take some time",
+      );
+      document.getElementById("uploadForm").submit();
+    });
+</script>
+
+{% endblock %}

@@ -2,3 +2,5 @@ data
 upwatch_data
 .DS_STORE
 **/__pycache__
+.docker
+.idea

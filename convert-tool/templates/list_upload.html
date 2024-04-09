@@ -167,7 +167,7 @@
 
     <script>
         let WINDOW_SIZE = 100;
-        
+
         const label = (tooltipItem, sensorName) => {
             const actualDataIndex = parseInt(tooltipItem.label)
             let footerContent = '';
@@ -188,7 +188,7 @@
                 responsive: true,
                 scales: {
                     y : {
-                        max : scale,    
+                        max : scale,
                         min : -scale
                     }
                 },
@@ -208,11 +208,11 @@
             console.log(data);
             // Define your time series data
             const timeSeriesData = data;
-       
+
             // Get the canvas and context
             const canvas = document.getElementById(chartId);
             const ctx = canvas.getContext('2d');
-    
+
             // Set up the chart
             const chart = new Chart(ctx, {
                 type: 'line',
@@ -352,7 +352,7 @@
         function displayMessage(msg) {
             document.getElementById("message").innerText = msg;
         }
-        
+
         document.getElementById('uploadBtn').addEventListener('click', function(event) {
             event.preventDefault();
 
