@@ -10,6 +10,7 @@ import pandas as pd
 from openmovement.load import CwaData
 
 from env import env_config, FIRST_SENSOR_PREFIX, SECOND_SENSOR_PREFIX
+from utils.paths import get_dataset_upload_dir
 
 
 @dataclass
@@ -30,10 +31,10 @@ def get_cwa_data_from_file(cwa_file) -> CwaDataType:
         )
 
 
-def find_file_in_dataset(dataset: str):
+def find_file_in_dataset(dataset_id: str):
     cwa_file_1, cwa_file_2, mp4_file = None, None, None
 
-    dataset_path = os.path.join(env_config['UPLOAD_FOLDER'], dataset)
+    dataset_path = get_dataset_upload_dir(dataset_id)
     if not os.path.exists(dataset_path):
         return None, None, None
     file_list = os.listdir(dataset_path)

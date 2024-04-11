@@ -6,7 +6,7 @@
 <ul class="max-w-md divide-y divide-gray-200 dark:divide-gray-700">
   {% for dataset in datasets %}
   <li class="">
-    <a href="{{ url_for('dataset', dataset=dataset) }}">{{ dataset }}</a>
+    <a href="{{ url_for('dataset', dataset_id=dataset) }}">{{ dataset | ctime }}</a>
   </li>
   {% endfor %}
 </ul>

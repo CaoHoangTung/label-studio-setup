@@ -1,0 +1,125 @@
+{% macro sensor_chart(id) %}
+    <div class="flex flex-col gap-2">
+        <div class="signal-chart w-full">
+            <div class="canvas-region">
+                <div class="flex flex-row items-stretch">
+                    <input
+                            id="{{ id }}-scale"
+                            type="range"
+                            orient="vertical"
+                            min="1"
+                            max="10"
+                            value="3"
+                            oninput="window.updateChartScale('{{ id }}', this.value)"
+                            class="my-2"
+                    />
+                    <label for="{{ id }}-scale" class="text-center" style="writing-mode: sideways-lr">Scale</label>
+                </div>
+                <canvas id="{{ id }}-canvas" class="max-h-[300px]"></canvas>
+            </div>
+        </div>
+        <div class="flex flex-row items-center gap-1">
+            <button
+                    class="btn btn-secondary btn-sm"
+                    type="button"
+                    onmousedown="window.startSeekStepInterval(-50, '{{ id }}')"
+                    onmouseup="window.stopSeekStepInterval('{{ id }}')"
+                    onmouseleave="window.stopSeekStepInterval('{{ id }}')"
+            >
+                <iconify-icon icon="ph:caret-double-left-bold"></iconify-icon>
+            </button>
+            <button
+                    class="btn btn-secondary btn-sm"
+                    type="button"
+                    onmousedown="window.startSeekStepInterval(-1, '{{ id }}')"
+                    onmouseup="window.stopSeekStepInterval('{{ id }}')"
+                    onmouseleave="window.stopSeekStepInterval('{{ id }}')"
+            >
+                <iconify-icon icon="ph:caret-left-bold"></iconify-icon>
+            </button>
+            <input
+                    class="w-full flex-1"
+                    type="range"
+                    id="{{ id }}-time-slider"
+                    min="0"
+                    max=""
+                    step="1"
+                    value="0"
+                    oninput="window.seekSensorTime(parseInt(this.value), '{{ id }}', 'slider')"
+            />
+            <input
+                    class="form-field-input form-field-input-sm w-[80px]"
+                    type="number"
+                    id="{{ id }}-time-input"
+                    min="0"
+                    max=""
+                    step="1"
+                    value="0"
+                    oninput="window.seekSensorTimeDebounced(parseInt(this.value), '{{ id }}', 'number')"
+            />
+            <button
+                    class="btn btn-secondary btn-sm"
+                    type="button"
+                    onmousedown="window.startSeekStepInterval(1, '{{ id }}')"
+                    onmouseup="window.stopSeekStepInterval('{{ id }}')"
+                    onmouseleave="window.stopSeekStepInterval('{{ id }}')"
+            >
+                <iconify-icon icon="ph:caret-right-bold"></iconify-icon>
+            </button>
+            <button
+                    class="btn btn-secondary btn-sm"
+                    type="button"
+                    onmousedown="window.startSeekStepInterval(50, '{{ id }}')"
+                    onmouseup="window.stopSeekStepInterval('{{ id }}')"
+                    onmouseleave="window.stopSeekStepInterval('{{ id }}')"
+            >
+                <iconify-icon icon="ph:caret-double-right-bold"></iconify-icon>
+            </button>
+
+        </div>
+        <div class="flex flex-col md:flex-row gap-5">
+            <div class="flex flex-col flex-1">
+                <label for="{{ id }}-start" class="form-field-label">Start position:</label>
+                <div class="flex flex-row gap-2">
+                    <input
+                            class="form-field-input flex-1"
+                            name="{{ id }}-start"
+                            id="{{ id }}-start"
+                            type="number"
+                            min="0"
+                            value="0"
+                    />
+                    <button
+                            class="btn btn-primary"
+                            type="button"
+                            onclick="window.setSensorPosition('{{ id }}', '{{ id }}-start')"
+                    >
+                        Set current time as start
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex flex-col flex-1">
+                <label for="{{ id }}-end" class="form-field-label">End position:</label>
+                <div class="flex flex-row gap-2">
+                    <input
+                            class="form-field-input flex-1"
+                            type="number"
+                            name="{{ id }}-end"
+                            id="{{ id }}-end"
+                            min="0"
+                            value="0"
+                    />
+                    <button
+                            class="btn btn-primary"
+                            type="button"
+                            onclick="window.setSensorPosition('{{ id }}', '{{ id }}-end')"
+                    >
+                        Set current time as end
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endmacro %}

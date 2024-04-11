@@ -1,8 +1,12 @@
 """
 Process mov file and write to mp4 file
 """
+import os
+
 from moviepy.video.io.VideoFileClip import VideoFileClip
 from openmovement.load import CwaData
+
+from env import env_config
 
 
 def process_mov(mov_file: str, mp4_path: str, start_second: float = None, end_second: float = None):
@@ -74,13 +78,14 @@ sensor: sensor name
 def create_import_file(import_filename, csv_path, csv_path_2, csv_filename, mp4_filename, sensor="unknown"):
     with open("../static/import_template.json") as f_template:
         template_content = f_template.read()
+
         import_content = template_content.replace('[[csv_filename]]', csv_filename). \
             replace('[[mp4_filename]]', mp4_filename). \
             replace('[[csv_path]]', csv_path.replace('\\', '\\\\')). \
             replace('[[csv_path_2]]', csv_path_2.replace('\\', '\\\\')). \
             replace('[[sensor]]', str(sensor))
-        with open(os.path.join(app.config['DOWNLOAD_FOLDER'], import_filename), 'w') as fout:
-            fout.write(import_content)
+        with open(os.path.join(env_config['DOWNLOAD_FOLDER'], import_filename), 'w') as file:
+            file.write(import_content)
 
 
 def append_datetime_prefix(filename, start_date, start_time, end_date, end_time):

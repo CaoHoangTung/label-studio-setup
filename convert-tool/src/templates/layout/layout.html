@@ -19,7 +19,7 @@
             class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4"
     >
         <a
-                href="https://flowbite.com/"
+                href="{{ url_for('index') }}"
                 class="flex items-center space-x-3 rtl:space-x-reverse"
         >
             <iconify-icon
@@ -88,9 +88,14 @@
     </div>
 </nav>
 
-<main class="content-center px-4 py-10 sm:container mx-auto prose prose-sm">
-    {% block content %} {% endblock %}
-</main>
+<div class="block content-center px-4 py-10 min-w-full prose prose-sm">
+    {% block container %}
+        <div class="md:container mx-auto">
+            {% block content %}
+            {% endblock %}
+        </div>
+    {% endblock %}
+</div>
 <script>
     initFlowbite()
 </script>
