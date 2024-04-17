@@ -101,6 +101,8 @@ def process_match_file(dataset_id, video_start: float, video_end: float,
         sample_rate1=sample_rate1,
         sample_rate2=sample_rate2,
         sensor=1,
+        csv_path1=csv_path1,
+        csv_path2=csv_path2,
     )
     LSSegmentMatchProject.import_tasks(import_file_path)
 

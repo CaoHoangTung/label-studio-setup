@@ -83,10 +83,13 @@ sensor: sensor name
 video_script = ""
 
 
-def create_import_file(dataset_id, match_id,
-                       import_file_path,
-                       sample_rate1, sample_rate2,
-                       sensor="unknown"):
+def create_import_file(
+        dataset_id, match_id,
+        import_file_path,
+        sample_rate1, sample_rate2,
+        csv_path1, csv_path2,
+        sensor="unknown",
+):
     import_data = render_template(
         "import_template.json",
         sensor=str(sensor),
@@ -94,7 +97,11 @@ def create_import_file(dataset_id, match_id,
         sample_rate1=sample_rate1,
         sample_rate2=sample_rate2,
         match_id=match_id,
+        csv_path1=csv_path1,
+        csv_path2=csv_path2,
     )
+
+
     with open(import_file_path, 'w') as file:
         print(import_data, file=file)
     return import_file_path
