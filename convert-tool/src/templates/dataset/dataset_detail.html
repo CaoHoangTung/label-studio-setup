@@ -41,8 +41,20 @@
 
 
     <section>
-        <h2>Data matchup & sync</h2>
-        <a class="btn btn-primary" href="{{ url_for('dataset_match', dataset_id=dataset_id) }}">Match again</a>
+        <div class="inline-flex mt-3 mb-2 justify-between w-full items-end">
+            <h2 class="m-0">Data matchup & sync</h2>
+            <a class="btn btn-primary" href="{{ url_for('dataset_match', dataset_id=dataset_id) }}">Match video again</a>
+        </div>
+        <ul class="pl-0 list-none">
+            {% for match in matches %}
+                <li>
+                    <a class="flex items-center gap-x-3"
+                       href="{{ url_for('get_match_detail', dataset_id=dataset_id, match_id=match) }}">
+                        {{ match | ctime }}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
     </section>
 
     <section>

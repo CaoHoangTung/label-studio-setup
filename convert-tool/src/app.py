@@ -9,8 +9,8 @@ from controller.chunk import chunk_video_and_sensors
 from controller.match import process_dataset_upload, process_match_file
 from env import env_config
 from utils.jinja import define_jinja_functions
-from utils.paths import get_dataset_upload_dir, get_dataset_match_dir, get_dataset_dir, get_dataset_processed_dir, \
-    get_dataset_chunk_dir
+from utils.paths import get_dataset_upload_dir, get_match_dir, get_dataset_dir, get_dataset_processed_dir, \
+    get_dataset_chunk_dir, get_dataset_matches_dir, list_numeric
 
 app = Flask(__name__)
 app.config.update(env_config)
@@ -37,22 +37,28 @@ def index():
     )
 
 
-@app.route('/dataset/<dataset_id>')
-def dataset_detail(dataset_id: str):
+@app.route('/dataset/<dataset_id>', methods=["GET"])
+def get_dataset_detail(dataset_id: str):
     upload_dir = get_dataset_upload_dir(dataset_id)
     processed_dir = get_dataset_processed_dir(dataset_id)
+    matches_dir = get_dataset_matches_dir(dataset_id)
 
     if not os.path.exists(upload_dir):
         return render_template('404.html', message="Dataset not found"), 404
 
-    uploaded_files = os.listdir(upload_dir)
+    uploaded_files = list_numeric(upload_dir)
+    uploaded_files.sort()
     processed_files = os.listdir(processed_dir)
+    processed_files.sort()
+    matches = list_numeric(matches_dir)
+    matches.sort()
 
     return render_template(
-        'dataset/detail.html',
+        'dataset/dataset_detail.html',
         dataset_id=dataset_id,
         uploaded_files=uploaded_files,
         processed_files=processed_files,
+        matches=matches,
     )
 
 
@@ -86,7 +92,7 @@ def upload_file():
 
     dataset_id = str(int(time.time()))
     process_dataset_upload(dataset_id, file_cwa_1, file_cwa_2, file_mov)
-    return redirect(url_for('dataset_detail', dataset_id=dataset_id))
+    return redirect(url_for('get_dataset_detail', dataset_id=dataset_id))
 
 
 @app.route('/dataset/<dataset_id>/uploads/<filename>')
@@ -103,7 +109,7 @@ def get_dataset_processed_file(dataset_id, filename):
 
 @app.route('/dataset/<dataset_id>/matches/<match_id>')
 def get_match_detail(dataset_id, match_id):
-    match_dir = get_dataset_match_dir(dataset_id, match_id)
+    match_dir = get_match_dir(dataset_id, match_id)
     files = os.listdir(match_dir)
     return render_template('dataset/match/match_detail.html', dataset_id=dataset_id, match_id=match_id, files=files)
 
@@ -115,7 +121,7 @@ def form_chunk_matched_data(dataset_id, match_id):
 
 @app.route('/dataset/<dataset_id>/matches/<match_id>/files/<filename>')
 def download_match_file(dataset_id, match_id, filename):
-    match_dir = get_dataset_match_dir(dataset_id, match_id)
+    match_dir = get_match_dir(dataset_id, match_id)
     return send_from_directory(match_dir, filename, as_attachment=True)
 
 
@@ -129,7 +135,7 @@ def append_with_datetime_prefix(csv_path, start_datetime, end_datetime):
 def process_match_dataset(dataset_id):
     sensor1_start, sensor1_end = int(request.form.get('sensor1-start')), int(request.form.get('sensor1-end'))
     sensor2_start, sensor2_end = int(request.form.get('sensor2-start')), int(request.form.get('sensor2-end'))
-    video_start, video_end = int(request.form.get('video-start')), int(request.form.get('video-start'))
+    video_start, video_end = float(request.form.get('video-start')), float(request.form.get('video-end'))
     match_id = process_match_file(
         dataset_id, video_start, video_end,
         sensor1_start, sensor1_end, sensor2_start, sensor2_end

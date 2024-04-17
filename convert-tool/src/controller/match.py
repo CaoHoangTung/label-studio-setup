@@ -9,7 +9,7 @@ from ls_client import LSSegmentMatchProject
 from env import FIRST_SENSOR_PREFIX, SECOND_SENSOR_PREFIX
 from utils.cwa import get_cwa_data_from_file
 from utils.dataset import delete_and_recreate_dir, get_file_name_from_path
-from utils.paths import get_dataset_upload_dir, get_dataset_match_dir, get_dataset_processed_dir, \
+from utils.paths import get_dataset_upload_dir, get_match_dir, get_dataset_processed_dir, \
     find_file_in_dataset
 from controller.match_utils import process_video, trim_cwa_file_and_export_csv, create_import_file
 
@@ -70,14 +70,13 @@ def process_match_file(dataset_id, video_start: float, video_end: float,
     if cwa_file1 is None or cwa_file2 is None or mp4_file is None:
         raise NotFound(f"Can't find the dataset {dataset_id} or its files")
 
+    print(video_start, video_end, sensor1_start, sensor1_end, sensor2_start, sensor2_end)
+
     match_id = str(int(time.time()))
-    download_dir = get_dataset_match_dir(dataset_id, match_id)
+    download_dir = get_match_dir(dataset_id, match_id)
     delete_and_recreate_dir(download_dir)
 
-    mp4_filename = get_file_name_from_path(mp4_file) + '.mp4'
-    csv_filename_1 = get_file_name_from_path(cwa_file1)
-    csv_filename_2 = get_file_name_from_path(cwa_file2)
-    output_mp4_path = os.path.join(download_dir, mp4_filename)
+    output_mp4_path = os.path.join(download_dir, "video.mp4")
     csv_path1 = os.path.join(download_dir, "sensor1.csv")
     csv_path2 = os.path.join(download_dir, "sensor2.csv")
 
@@ -95,15 +94,14 @@ def process_match_file(dataset_id, video_start: float, video_end: float,
     import_file = os.path.join(download_dir, f'import.json')
 
     # Setting default offset=0. The index would be the index of the csv bandpass file
-    tasks = create_import_file(
+    import_file_path = create_import_file(
         dataset_id=dataset_id,
         match_id=match_id,
         import_file_path=import_file,
-        csv_path=csv_path1, csv_path_2=csv_path2,
-        csv_filename1=csv_filename_1, csv_filename2=csv_filename_2,
-        sample_rate1=sample_rate1, sample_rate2=sample_rate2,
-        mp4_filename=mp4_filename, sensor=1,
+        sample_rate1=sample_rate1,
+        sample_rate2=sample_rate2,
+        sensor=1,
     )
-    LSSegmentMatchProject.import_tasks(tasks)
+    LSSegmentMatchProject.import_tasks(import_file_path)
 
     return match_id

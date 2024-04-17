@@ -37,12 +37,16 @@ matching_label_config = """
   </View>
 </View>
 """
-
+if LSSegmentMatchProject.label_config != matching_label_config:
+    LSSegmentMatchProject.set_params(label_config=matching_label_config)
 LSSegmentClassifyProject = LabelStudioClient.get_project(int(LABEL_STUDIO_SEGMENT_CLASSIFY_PROJECT_ID))
 classify_label_config = """
 <View>
   <View style="width: 100%">
     <HyperText name="video" value="$video" inline="true"/>
+    <TimeSeries name="ts" value="$csv" valueType="url" timeColumn="index">
+        <Channel column="ax3_bandpass"/>
+      </TimeSeries>
   </View>
 
   <Choices name="label" toName="video">

@@ -5,6 +5,7 @@ import json
 import os
 
 import pandas as pd
+from flask import render_template
 from moviepy.video.io.VideoFileClip import VideoFileClip
 from openmovement.load import CwaData
 
@@ -79,29 +80,24 @@ mp4_filename: name of the mp4 file
 sensor: sensor name
 """
 
+video_script = ""
 
-def create_import_file(dataset_id, match_id, import_file_path,
-                       csv_path, csv_path_2,
-                       csv_filename1, csv_filename2,
+
+def create_import_file(dataset_id, match_id,
+                       import_file_path,
                        sample_rate1, sample_rate2,
-                       mp4_filename, sensor="unknown"):
-    tasks = [
-        {
-            "sensor": str(sensor),
-            "csv_path": str(csv_path),
-            "csv_path_2": str(csv_path_2),
-            "csv": f"/data/local-files/?d=storage/{dataset_id}/download/{match_id}/{csv_filename1}",
-            "csv2": f"/data/local-files/?d=storage/{dataset_id}/download/{match_id}/{csv_filename2}",
-            "video": f"<video src='/data/local-files/?d=storage/{dataset_id}/download/{match_id}/{mp4_filename}' type='video/quicktime' width='100%' controls " + "onloadeddata=\"setTimeout(function(){ts=Htx.annotationStore.selected.names.get('ts');t=ts.data.index;v=document.getElementsByTagName('video')[0];w=parseInt(t.length*(5/v.duration));l=t.length-w;ts.updateTR([t[0], t[w]], 1.001);r=$=>ts.brushRange.map(n=>(+n).toFixed(2));_=r();setInterval($=>r().some((n,i)=>n!==_[i])&&(_=r())&&(v.currentTime=v.duration*(r()[0]-t[0])/(t.slice(-1)[0]-t[0]-(r()[1]-r()[0]))),300); console.log('video is loaded, starting to sync with time series')}, 3000); \" />",
-            "sensor1_sample_rate": sample_rate1,
-            "sensor2_sample_rate": sample_rate2,
-
-        }
-    ]
-
+                       sensor="unknown"):
+    import_data = render_template(
+        "import_template.json",
+        sensor=str(sensor),
+        dataset_id=dataset_id,
+        sample_rate1=sample_rate1,
+        sample_rate2=sample_rate2,
+        match_id=match_id,
+    )
     with open(import_file_path, 'w') as file:
-        json.dump(tasks, file)
-    return tasks
+        print(import_data, file=file)
+    return import_file_path
 
 
 def append_datetime_prefix(filename, start_date, start_time, end_date, end_time):

@@ -28,8 +28,12 @@ def get_dataset_processed_dir(dataset_id):
     return os.path.join(os.getcwd(), env_config['DATASET_FOLDER'], dataset_id, "processed")
 
 
-def get_dataset_match_dir(dataset_id, match_id):
-    return os.path.join(os.getcwd(), env_config['DATASET_FOLDER'], dataset_id, "match", match_id)
+def get_dataset_matches_dir(dataset_id):
+    return os.path.join(os.getcwd(), env_config['DATASET_FOLDER'], dataset_id, "match")
+
+
+def get_match_dir(dataset_id, match_id):
+    return os.path.join(get_dataset_matches_dir(dataset_id), match_id)
 
 
 def get_dataset_chunk_dir(dataset_id, chunk_id):
@@ -38,6 +42,10 @@ def get_dataset_chunk_dir(dataset_id, chunk_id):
 
 def first(lst: List[any]) -> any:
     return lst[0] if lst and len(lst) > 0 else None
+
+
+def list_numeric(directory: str) -> List[str]:
+    return sorted([d for d in os.listdir(directory) if d.isdigit()])
 
 
 def find_file_in_dataset(dataset_id: str):

@@ -7,7 +7,7 @@ import pandas as pd
 from moviepy.video.io.VideoFileClip import VideoFileClip
 
 from ls_client import LSSegmentClassifyProject
-from utils.paths import get_dataset_match_dir, get_dataset_dir, get_dataset_chunk_dir
+from utils.paths import get_match_dir, get_dataset_dir, get_dataset_chunk_dir
 
 
 def float_range(start: float, stop: float, step: float) -> Iterable[float]:
@@ -33,7 +33,7 @@ def chunk_pandas_dataframe(df: pd.DataFrame, chunk_size: int) -> Iterable[pd.Dat
 def chunk_video_and_sensors(dataset_id, match_id, chunk_size_second):
     if chunk_size_second < 0:
         raise ValueError("chunk_size_second must be a positive number")
-    match_dir = get_dataset_match_dir(dataset_id, match_id)
+    match_dir = get_match_dir(dataset_id, match_id)
     with open(os.path.join(match_dir, "import.json")) as json_file:
         metadata = json.load(json_file)[0]
         sample_rate1, sample_rate2 = metadata.get("sample_rate1", 100), metadata.get("sample_rate2", 100)
