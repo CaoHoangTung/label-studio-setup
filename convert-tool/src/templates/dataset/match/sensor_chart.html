@@ -1,8 +1,9 @@
 {% macro sensor_chart(id) %}
     <div class="flex flex-col gap-2">
-        <div class="signal-chart w-full">
-            <div class="canvas-region">
-                <div class="flex flex-row items-stretch">
+        <div class="w-full">
+            <div class="flex flex-row w-full items-stretch">
+                <div class="flex flex-row items-stretch basis-[50px]">
+                    <label for="{{ id }}-scale" class="text-center" style="writing-mode: sideways-lr">Scale</label>
                     <input
                             id="{{ id }}-scale"
                             type="range"
@@ -13,9 +14,18 @@
                             oninput="window.updateChartScale('{{ id }}', this.value)"
                             class="my-2"
                     />
-                    <label for="{{ id }}-scale" class="text-center" style="writing-mode: sideways-lr">Scale</label>
                 </div>
-                <canvas id="{{ id }}-canvas" class="max-h-[300px]"></canvas>
+                <div class="flex flex-col md:flex-row flex-1 items-stretch md:items-center">
+                    <div class="flex-1 max-w-full md:max-w-[350px] h-[200px]">
+                        <canvas id="{{ id }}-canvas-x" class="w-full h-full"></canvas>
+                    </div>
+                    <div class="flex-1 max-w-full md:max-w-[350px] h-[200px]">
+                        <canvas id="{{ id }}-canvas-y" class="w-full h-full"></canvas>
+                    </div>
+                    <div class="flex-1 max-w-full md:max-w-[350px] h-[200px]">
+                        <canvas id="{{ id }}-canvas-z" class="w-full h-full"></canvas>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="flex flex-row items-center gap-1">

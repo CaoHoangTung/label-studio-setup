@@ -17,6 +17,7 @@ services:
     #      - NGINX_SSL_CERT_KEY=/certs/cert.key
     volumes:
       - .docker/mydata:/label-studio/data:rw
+      - .data/dataset:/storage
     #   Optional: Override nginx default conf
     #      - ./deploy/my.conf:/etc/nginx/nginx.conf
     command: nginx
@@ -31,6 +32,8 @@ services:
       - "8000"
     depends_on:
       - db
+    env_file:
+      - .env
     environment:
       - DJANGO_DB=default
       - POSTGRE_NAME=postgres
@@ -40,9 +43,12 @@ services:
       - POSTGRE_HOST=db
       - LABEL_STUDIO_HOST=${LABEL_STUDIO_HOST:-}
       - JSON_LOG=1
+      - LABEL_STUDIO_LOCAL_FILES_SERVING_ENABLED=true
+      - LABEL_STUDIO_LOCAL_FILES_DOCUMENT_ROOT=/
     #      - LOG_LEVEL=DEBUG
     volumes:
       - .docker/mydata:/label-studio/data:rw
+      - .data/dataset:/storage
     command: label-studio-uwsgi
 
   db:

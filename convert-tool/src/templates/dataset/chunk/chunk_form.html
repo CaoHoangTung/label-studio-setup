@@ -1,0 +1,58 @@
+{% extends "layout/layout.html" %}
+{% from 'dataset/match/sensor_chart.html' import sensor_chart %}
+{% block title %} Dataset {{ dataset_id }} {% endblock %}
+{% block content %}
+    <h1>Chunk dataset</h1>
+
+    <form
+            action="{{ url_for('process_chunk_dataset', dataset_id=dataset_id, match_id=match_id) }}"
+            method="POST"
+            enctype="multipart/form-data"
+            id="uploadForm"
+            autocomplete="off"
+    >
+        <h2>Video</h2>
+        <video
+                controls
+                ondurationchange="window.setTotalVideoTime && window.setTotalVideoTime()"
+                class="max-w-[600px] mx-auto"
+        >
+            <source
+                    src="{{ url_for('download_match_file', dataset_id=dataset_id, match_id=match_id, filename='converted.mp4') }}"
+            />
+        </video>
+
+
+        <div class="flex flex-col">
+            <label for="chunk-size" class="form-field-label">Chunk size (seconds)</label>
+            <input
+                    class="form-field-input flex-1"
+                    name="chunk-size"
+                    id="chunk-size"
+                    value="4"
+                    type="number"
+            />
+        </div>
+
+
+        <input class="btn btn-primary my-5" id="uploadBtn" type="submit" width="100px" height="100px"
+               value="Chunk"/>
+    </form>
+
+    {% include 'layout/toast.html' %}
+    <script>
+        document
+            .getElementById("uploadBtn")
+            .addEventListener("click", function (event) {
+                event.preventDefault();
+
+                this.disabled = true;
+                showInfoToast(
+                    "Processing files, please do not turn off the browser. If the files are large, this operation may take some time",
+                );
+                document.getElementById("uploadForm").submit();
+            });
+    </script>
+
+
+{% endblock %}

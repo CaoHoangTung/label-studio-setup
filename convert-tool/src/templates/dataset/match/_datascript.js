@@ -1,4 +1,4 @@
-const WINDOW_SIZE = 100;
+const WINDOW_SIZE = 50;
 function debounce(func, timeout = 300) {
     let timer;
     return (...args) => {
@@ -8,6 +8,8 @@ function debounce(func, timeout = 300) {
         }, timeout);
     };
 }
+const AXES = ["x", "y", "z"]
+const AXES_COLORS = {x: "blue", y: "red", z: "green"};
 document.addEventListener("DOMContentLoaded", async (event) => {
     window.setTotalVideoTime = function () {
         const videoElement = document.querySelector("video");
@@ -20,7 +22,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     };
 
     const sensorData = await fetch(
-        "{{ url_for('get_dataset_uploaded_file', dataset_id=dataset_id, filename='sensor.json') }}",
+        "{{ url_for('get_dataset_processed_file', dataset_id=dataset_id, filename='sensor.json') }}",
     ).then((response) => {
         if (!response.ok) {
             throw new Error("HTTP error " + response.status);
@@ -98,7 +100,6 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
     function createChartOption(sensorName, scale) {
         return {
-            responsive: true,
             scales: {
                 y: {
                     suggestedMax: scale,
@@ -118,37 +119,31 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
     function setupChart(chartId, data, sensorName) {
         // Get the canvas and context
-        const canvas = document.getElementById(chartId);
-        const ctx = canvas.getContext("2d");
 
+        const chart = {};
+
+        AXES.forEach(axis => {
+            const canvas = document.getElementById(chartId + "-" + axis);
+            const ctx = canvas.getContext("2d");
+
+            chart[axis] = new Chart(ctx, {
+                type: "line",
+                data: {
+                    labels: Array.from({length: WINDOW_SIZE}, (_, i) => i),
+                    datasets: [
+                        {
+                            label: chartId,
+                            data: data[axis].slice(0, WINDOW_SIZE),
+                            borderColor: AXES_COLORS[axis],
+                            backgroundColor: "transparent",
+                        },
+                    ],
+                },
+                options: createChartOption(sensorName, 3),
+            });
+        })
         // Set up the chart
-        const chart = new Chart(ctx, {
-            type: "line",
-            data: {
-                labels: Array.from({length: WINDOW_SIZE}, (_, i) => i),
-                datasets: [
-                    {
-                        label: chartId,
-                        data: data.x.slice(0, WINDOW_SIZE),
-                        borderColor: "blue",
-                        backgroundColor: "transparent",
-                    },
-                    {
-                        label: chartId,
-                        data: data.y.slice(0, WINDOW_SIZE),
-                        borderColor: "red",
-                        backgroundColor: "transparent",
-                    },
-                    {
-                        label: chartId,
-                        data: data.z.slice(0, WINDOW_SIZE),
-                        borderColor: "green",
-                        backgroundColor: "transparent",
-                    },
-                ],
-            },
-            options: createChartOption(sensorName, 3),
-        });
+
         return {
             chart: chart,
             originalData: data,
@@ -159,25 +154,29 @@ document.addEventListener("DOMContentLoaded", async (event) => {
         // New scale configuration
         const newScaleOptions = createChartOption(sensorName, newScale);
 
-        // Update the chart's options with the new scale options
-        const chart = sensorChartData[sensorName].chart;
-        chart.config.options = newScaleOptions;
-        chart.update();
+        AXES.forEach(axis => {
+            // Update the chart's options with the new scale options
+            const chart = sensorChartData[sensorName].chart[axis];
+            chart.config.options = newScaleOptions;
+            chart.update();
+        })
     };
 
     // Function to update the chart with current time
     function seekChart(sensorChart, time) {
         const chart = sensorChart.chart;
-        const data = sensorChart.originalData;
+        const origData = sensorChart.originalData;
 
         time = parseInt(time);
-        chart.options.plugins.tooltip.enabled = false;
-        chart.options.plugins.tooltip.enabled = true;
-        chart.data.labels = Array.from({length: WINDOW_SIZE}, (_, i) => i + time);
-        chart.data.datasets[0].data = data.x.slice(time, time + WINDOW_SIZE);
-        chart.data.datasets[1].data = data.y.slice(time, time + WINDOW_SIZE);
-        chart.data.datasets[2].data = data.z.slice(time, time + WINDOW_SIZE);
-        chart.update();
+
+        AXES.forEach(axis => {
+            const a = chart[axis]
+            a.options.plugins.tooltip.enabled = false;
+            a.options.plugins.tooltip.enabled = true;
+            a.data.labels = Array.from({length: WINDOW_SIZE}, (_, i) => i + time);
+            a.data.datasets[0].data = origData[axis].slice(time, time + WINDOW_SIZE);
+            a.update();
+        });
     }
 
     // Function to seek to a specific time in the animation

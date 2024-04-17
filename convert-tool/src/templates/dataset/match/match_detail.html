@@ -1,0 +1,36 @@
+{% extends "layout/layout.html" %}
+{% block title %}
+    Download exports
+{% endblock %}
+<title></title>
+
+{% block content %}
+    <h1>Instructions</h1>
+    <p>
+        Your file processing is done. Your data has been automatically uploaded to LabelStudio.
+        You can also download the files below
+    </p>
+    <h2>Processed file</h2>
+    <ul class="pl-0">
+        {% for file in files %}
+            <a href="{{ url_for('download_match_file', dataset_id=dataset_id, match_id=match_id, filename=file) }}">
+                <li class="flex items-center gap-x-3">
+                    <iconify-icon icon="{{ file_icon_name(file) }}" class="text-3xl"></iconify-icon>
+                    <span>{{ file }}</span>
+                </li>
+            </a>
+        {% endfor %}
+    </ul>
+
+    <hr/>
+
+    <h2>Chunk the data</h2>
+    <p>
+        You can also create a new task to chunk the data into equal-length segments.
+        This can be imported into more classification tasks
+    </p>
+    <a class="btn btn-primary"
+       href="{{ url_for('form_chunk_matched_data', dataset_id=dataset_id, match_id=match_id) }}">Chunk this dataset</a>
+
+
+{% endblock %}

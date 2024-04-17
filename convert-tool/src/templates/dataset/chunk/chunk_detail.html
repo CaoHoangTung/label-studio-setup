@@ -1,0 +1,38 @@
+{% extends "layout/layout.html" %}
+{% block title %}
+    Download chunks
+{% endblock %}
+<title></title>
+
+{% block content %}
+    <h1>Instructions</h1>
+    <p>
+        Your file processing is done.
+        You can also download the files below
+    </p>
+    <h2>Processed file</h2>
+
+    <a class="btn btn-primary"
+       href="{{ url_for('download_chunk_zip', dataset_id=dataset_id, chunk_id=chunk_id) }}">
+        Download Everything as a Zip
+    </a>
+    <ul class="pl-0 divide-blue-100 divide-y-2">
+        {% for chunk in chunks %}
+            <li class="flex flex-col gap-y-2">
+                <div>Chunk {{ loop.index }}</div>
+                <div class="flex items-center gap-x-8">
+                    {% for file in ['video.mp4', 'sensor1.csv', 'sensor2.csv'] %}
+                        <a href="{{ url_for('download_chunk_file', dataset_id=dataset_id, chunk_id=chunk_id, chunk=chunk, filename=file) }}"
+                           class="inline-flex items-center gap-x-3">
+                            <iconify-icon icon="{{ file_icon_name(file) }}" class="text-3xl"></iconify-icon>
+                            <span>{{ file }}</span>
+                        </a>
+                    {% endfor %}
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+
+
+
+{% endblock %}

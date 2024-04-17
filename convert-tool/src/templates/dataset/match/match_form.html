@@ -1,0 +1,124 @@
+{% extends "layout/layout.html" %}
+{% from 'dataset/match/sensor_chart.html' import sensor_chart %}
+{% block title %} Dataset {{ dataset_id }} {% endblock %}
+{% block extra_header %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .signal-chart {
+            width: 500px;
+        }
+
+        input[type="range"][orient="vertical"] {
+            writing-mode: bt-lr; /* IE */
+            -webkit-appearance: slider-vertical; /* Chromium */
+            width: 8px;
+            padding: 0 5px;
+        }
+    </style>
+
+    <script>
+        {% include 'dataset/match/_datascript.js' %}
+    </script>
+
+{% endblock %}
+
+{% block content %}
+
+    <h1>Extract & Match Sensor Data</h1>
+
+    <form
+            action="{{ url_for('process_match_dataset', dataset_id=dataset_id) }}"
+            method="POST"
+            enctype="multipart/form-data"
+            id="uploadForm"
+            autocomplete="off"
+    >
+        <h2>Video</h2>
+        <video
+                controls
+                ondurationchange="window.setTotalVideoTime && window.setTotalVideoTime()"
+                class="max-w-[600px] mx-auto"
+        >
+            <source
+                    src="{{ url_for('get_dataset_processed_file', dataset_id=dataset_id, filename='converted.mp4') }}"
+            />
+        </video>
+
+        <div class="flex flex-col md:flex-row gap-5">
+            <div class="flex flex-col flex-1">
+                <label for="video-start" class="form-field-label">Start position:</label>
+                <div class="flex flex-row gap-2">
+                    <input
+                            class="form-field-input flex-1"
+                            name="video-start"
+                            id="video-start"
+                            value="0"
+                    />
+                    <button
+                            class="btn btn-primary"
+                            type="button"
+                            onclick="setVideoPosition('video-start')"
+                    >
+                        Set current time as start
+                    </button>
+                </div>
+            </div>
+            <div class="flex flex-col flex-1">
+                <label for="video-start" class="form-field-label">End position:</label>
+                <div class="flex flex-row gap-2">
+                    <input
+                            class="form-field-input flex-1"
+                            name="video-end"
+                            id="video-end"
+                            value="-1"
+                    />
+                    <button
+                            class="btn btn-primary"
+                            type="button"
+                            onclick="setVideoPosition('video-end')"
+                    >
+                        Set current time as end
+                    </button>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="flex justify-center items-center my-5">
+            <iconify-icon id="sensor-data-loader" icon="svg-spinners:6-dots-rotate"
+                          class="text-blue-700 text-8xl"></iconify-icon>
+        </div>
+        <div id="sensor-data-sections" class="hidden flex-col gap-3">
+            <div class="flex-1">
+                <h2>Sensor 1</h2>
+                {{ sensor_chart('sensor1') }}
+            </div>
+
+            <div class="flex-1">
+                <h2>Sensor 2</h2>
+                {{ sensor_chart('sensor2') }}
+            </div>
+
+            <input class="btn btn-primary my-5" id="uploadBtn" type="submit" width="100px" height="100px"
+                   value="Extract & Match"/>
+        </div>
+
+    </form>
+
+    {% include 'layout/toast.html' %}
+    <script>
+        document
+            .getElementById("uploadBtn")
+            .addEventListener("click", function (event) {
+                event.preventDefault();
+
+                this.disabled = true;
+                showInfoToast(
+                    "Processing files, please do not turn off the browser. If the files are large, this operation may take some time",
+                );
+                document.getElementById("uploadForm").submit();
+            });
+    </script>
+
+
+{% endblock %}
