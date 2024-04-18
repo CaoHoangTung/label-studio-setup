@@ -10,7 +10,7 @@ from controller.match import process_dataset_upload, process_match_file
 from env import env_config
 from utils.jinja import define_jinja_functions
 from utils.paths import get_dataset_upload_dir, get_match_dir, get_dataset_dir, get_dataset_processed_dir, \
-    get_dataset_chunk_dir, get_dataset_matches_dir, list_numeric
+    get_dataset_chunk_dir, get_dataset_matches_dir, list_numeric, get_dataset_chunk_list_dir
 
 app = Flask(__name__)
 app.config.update(env_config)
@@ -30,9 +30,9 @@ def serve_static_file(filename):
 
 @app.route("/")
 def index():
-    datasets = os.listdir(app.config['DATASET_FOLDER'])
+    datasets = list_numeric(app.config['DATASET_FOLDER'])
     return render_template(
-        'dataset/list.html',
+        'dataset/dataset_list.html',
         datasets=datasets
     )
 
@@ -53,12 +53,17 @@ def get_dataset_detail(dataset_id: str):
     matches = list_numeric(matches_dir)
     matches.sort()
 
+    chunks_dir = get_dataset_chunk_list_dir(dataset_id)
+    chunks = list_numeric(chunks_dir)
+    matches.sort()
+
     return render_template(
         'dataset/dataset_detail.html',
         dataset_id=dataset_id,
         uploaded_files=uploaded_files,
         processed_files=processed_files,
         matches=matches,
+        chunks=chunks,
     )
 
 
@@ -114,6 +119,13 @@ def get_match_detail(dataset_id, match_id):
     return render_template('dataset/match/match_detail.html', dataset_id=dataset_id, match_id=match_id, files=files)
 
 
+@app.route('/dataset/<dataset_id>/matches/<match_id>/delete')
+def delete_match_detail(dataset_id, match_id):
+    match_dir = get_match_dir(dataset_id, match_id)
+    shutil.rmtree(match_dir)
+    return redirect(url_for("get_dataset_detail", dataset_id=dataset_id))
+
+
 @app.route('/dataset/<dataset_id>/matches/<match_id>/chunks', methods=['GET'])
 def form_chunk_matched_data(dataset_id, match_id):
     return render_template("dataset/chunk/chunk_form.html", dataset_id=dataset_id, match_id=match_id)
@@ -155,6 +167,13 @@ def get_chunk_detail(dataset_id, chunk_id):
     chunk_dir = get_dataset_chunk_dir(dataset_id, chunk_id)
     chunks = [d for d in os.listdir(chunk_dir) if os.path.isdir(os.path.join(chunk_dir, d))]
     return render_template("dataset/chunk/chunk_detail.html", dataset_id=dataset_id, chunk_id=chunk_id, chunks=chunks)
+
+
+@app.route('/dataset/<dataset_id>/chunks/<chunk_id>/delete', methods=['GET'])
+def delete_chunk_detail(dataset_id, chunk_id):
+    chunk_dir = get_dataset_chunk_dir(dataset_id, chunk_id)
+    shutil.rmtree(chunk_dir)
+    return redirect(url_for("get_dataset_detail", dataset_id=dataset_id))
 
 
 @app.route('/dataset/<dataset_id>/chunks/<chunk_id>/files/<chunk>/<filename>', methods=['GET'])

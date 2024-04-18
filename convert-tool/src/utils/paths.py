@@ -16,7 +16,7 @@ def get_dataset_upload_dir(dataset_id):
 
 def get_dataset_metadata_json_path(dataset_id):
     dataset_dir = get_dataset_dir(dataset_id)
-    return os.path.join(dataset_dir, 'metadata.json')
+    return os.path.join(dataset_dir, "processed", 'metadata.json')
 
 
 def get_dataset_metadata(dataset_id):
@@ -36,6 +36,10 @@ def get_match_dir(dataset_id, match_id):
     return os.path.join(get_dataset_matches_dir(dataset_id), match_id)
 
 
+def get_dataset_chunk_list_dir(dataset_id):
+    return os.path.join(os.getcwd(), env_config['DATASET_FOLDER'], dataset_id, "chunk")
+
+
 def get_dataset_chunk_dir(dataset_id, chunk_id):
     return os.path.join(os.getcwd(), env_config['DATASET_FOLDER'], dataset_id, "chunk", chunk_id)
 
@@ -45,6 +49,8 @@ def first(lst: List[any]) -> any:
 
 
 def list_numeric(directory: str) -> List[str]:
+    if not os.path.isdir(directory):
+        return []
     return sorted([d for d in os.listdir(directory) if d.isdigit()])
 
 

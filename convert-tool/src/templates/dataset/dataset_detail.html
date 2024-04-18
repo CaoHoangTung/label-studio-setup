@@ -43,14 +43,17 @@
     <section>
         <div class="inline-flex mt-3 mb-2 justify-between w-full items-end">
             <h2 class="m-0">Data matchup & sync</h2>
-            <a class="btn btn-primary" href="{{ url_for('dataset_match', dataset_id=dataset_id) }}">Match video again</a>
+            <a class="btn btn-primary" href="{{ url_for('dataset_match', dataset_id=dataset_id) }}">Match video
+                again</a>
         </div>
         <ul class="pl-0 list-none">
             {% for match in matches %}
-                <li>
-                    <a class="flex items-center gap-x-3"
-                       href="{{ url_for('get_match_detail', dataset_id=dataset_id, match_id=match) }}">
+                <li class="flex flex-row gap-x-4 items-center">
+                    <a href="{{ url_for('get_match_detail', dataset_id=dataset_id, match_id=match) }}">
                         {{ match | ctime }}
+                    </a>
+                    <a class="w-4 h-4" href="{{ url_for('delete_match_detail', dataset_id=dataset_id, match_id=match) }}">
+                        <iconify-icon icon="ph:trash-bold" class="w-4 h-4 text-red-700"></iconify-icon>
                     </a>
                 </li>
             {% endfor %}
@@ -58,8 +61,21 @@
     </section>
 
     <section>
-        <h2>Data split</h2>
+        <h2>Data chunk</h2>
+        <p>Chunk a data match into smaller, equal sized dataset</p>
 
+        <ul class="pl-0 list-none">
+            {% for chunk in chunks %}
+                <li class="flex flex-row gap-x-4 items-center">
+                    <a href="{{ url_for('get_chunk_detail', dataset_id=dataset_id, chunk_id=chunk) }}">
+                        {{ chunk | ctime }}
+                    </a>
+                    <a class="w-4 h-4" href="{{ url_for('delete_chunk_detail', dataset_id=dataset_id, chunk_id=chunk) }}">
+                        <iconify-icon icon="ph:trash-bold" class="w-4 h-4 text-red-700"></iconify-icon>
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
     </section>
 
 {% endblock %}

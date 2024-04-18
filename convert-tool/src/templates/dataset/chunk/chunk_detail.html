@@ -7,7 +7,13 @@
 {% block content %}
     <h1>Instructions</h1>
     <p>
-        Your file processing is done.
+        Your file processing is done. The data has been automatically uploaded to Label Studio
+        <br/>
+        <a href="{{ label_studio_path('projects/' + get_env('LABEL_STUDIO_SEGMENT_CLASSIFY_PROJECT_ID') + '/data') }}"
+           target="_blank">
+            See the uploaded data in Label Studio here
+        </a>
+        <br/>
         You can also download the files below
     </p>
     <h2>Processed file</h2>
