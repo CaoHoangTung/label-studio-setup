@@ -19,6 +19,7 @@ FIRST_SENSOR_PREFIX = 'sensor1_'
 SECOND_SENSOR_PREFIX = 'sensor2_'
 
 LABEL_STUDIO_HOST = os.environ.get('LABEL_STUDIO_HOST', 'http://localhost:8080')
+LABEL_STUDIO_PUBLIC_URL = os.environ.get('LABEL_STUDIO_PUBLIC_URL', LABEL_STUDIO_HOST)
 LABEL_STUDIO_EMAIL = os.environ.get('LABEL_STUDIO_EMAIL', 'upwatcher@gmail.com')
 LABEL_STUDIO_PASSWORD = os.environ.get('LABEL_STUDIO_PASSWORD', 'upwatch')
 LABEL_STUDIO_USER_TOKEN = os.environ.get('LABEL_STUDIO_USER_TOKEN')

@@ -10,3 +10,6 @@ deps:
 
 label_studio:
 	docker compose -f docker-compose.dev.yml up -d
+
+label_studio_down:
+	docker compose -f docker-compose.dev.yml down

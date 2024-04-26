@@ -23,7 +23,7 @@ def _file_icon_name(file_name):
 
 
 def _get_labelstudio_url(subpath: str):
-    return f"{LABEL_STUDIO_HOST}/{subpath}"
+    return f"{LABEL_STUDIO_PUBLIC_URL}/{subpath}"
 
 
 def _get_env(env):

@@ -1,13 +1,15 @@
 version: "3.9"
 services:
   nginx:
-    build: ./label-studio
     image: heartexlabs/label-studio:latest
     restart: unless-stopped
     ports:
       - "8080:8085"
       - "8081:8086"
     depends_on:
+      - app
+    networks:
+      - backend
       - app
     environment:
       - LABEL_STUDIO_HOST=${LABEL_STUDIO_HOST:-}
@@ -17,34 +19,40 @@ services:
     #      - NGINX_SSL_CERT_KEY=/certs/cert.key
     volumes:
       - .docker/mydata:/label-studio/data:rw
-      - .data/dataset:/storage
-    #   Optional: Override nginx default conf
-    #      - ./deploy/my.conf:/etc/nginx/nginx.conf
+      - .docker/convert-tool/dataset:/storage
+      #   Optional: Override nginx default conf
+      #      - ./deploy/my.conf:/etc/nginx/nginx.conf
     command: nginx
 
   app:
     stdin_open: true
     tty: true
-    build: ./label-studio
     image: heartexlabs/label-studio:latest
+    build:
+      context: label-studio
     restart: unless-stopped
+    networks:
+      - backend
     expose:
       - "8000"
     depends_on:
       - db
-    env_file:
-      - .env
     environment:
       - DJANGO_DB=default
       - POSTGRE_NAME=postgres
       - POSTGRE_USER=postgres
-      - POSTGRE_PASSWORD=
+      - POSTGRE_PASSWORD=postgres
       - POSTGRE_PORT=5432
       - POSTGRE_HOST=db
       - LABEL_STUDIO_HOST=${LABEL_STUDIO_HOST:-}
       - JSON_LOG=1
       - LABEL_STUDIO_LOCAL_FILES_SERVING_ENABLED=true
       - LABEL_STUDIO_LOCAL_FILES_DOCUMENT_ROOT=/
+      - LABEL_STUDIO_VOLUME_HOST_AUDIO_PATH=./data/files
+      - LABEL_STUDIO_USER_TOKEN=8074350c67b41d194da246f5dc4721e198862054
+      - LABEL_STUDIO_USERNAME=upwatcher@gmail.com
+      - LABEL_STUDIO_PASSWORD=upwatch
+
     #      - LOG_LEVEL=DEBUG
     volumes:
       - .docker/mydata:/label-studio/data:rw
@@ -62,9 +70,37 @@ services:
     #      -c ssl=on
     #      -c ssl_cert_file=/var/lib/postgresql/certs/server.crt
     #      -c ssl_key_file=/var/lib/postgresql/certs/server.key
+
+    networks:
+      - backend
     environment:
       - POSTGRES_HOST_AUTH_METHOD=trust
+      - POSTGRES_DATABASE=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
     volumes:
       - ${POSTGRES_DATA_DIR:-.docker/postgres-data}:/var/lib/postgresql/data
       - .docker/deploy/pgsql/certs:/var/lib/postgresql/certs:ro
 
+  convert-tool:
+    build: convert-tool
+    image: labelstudio-convert-tool
+    restart: unless-stopped
+    depends_on:
+      - nginx
+    networks:
+      - app
+    volumes:
+      - .docker/convert-tool:/app/.data
+    ports:
+      - "5000:5000"
+    environment:
+      - LABEL_STUDIO_HOST=http://nginx:8085
+      - LABEL_STUDIO_PUBLIC_URL=http://localhost:8080
+      - LABEL_STUDIO_USERNAME=upwatcher@gmail.com
+      - LABEL_STUDIO_USER_TOKEN=8074350c67b41d194da246f5dc4721e198862054
+      - LABEL_STUDIO_PASSWORD=upwatch
+
+networks:
+  app:
+  backend:

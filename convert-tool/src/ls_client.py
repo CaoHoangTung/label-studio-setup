@@ -1,16 +1,54 @@
+from typing import Optional
+
+import label_studio_sdk
 from label_studio_sdk import Client
 from label_studio_sdk.client import ClientCredentials
 
-from env import LABEL_STUDIO_HOST, LABEL_STUDIO_USER_TOKEN, LABEL_STUDIO_SEGMENT_MATCH_PROJECT_ID, \
-    LABEL_STUDIO_SEGMENT_CLASSIFY_PROJECT_ID
+from env import LABEL_STUDIO_HOST, LABEL_STUDIO_USER_TOKEN
 
 LabelStudioClient = Client(
     url=LABEL_STUDIO_HOST,
     credentials=ClientCredentials(api_key=LABEL_STUDIO_USER_TOKEN),
 )
 
-LSSegmentMatchProject = LabelStudioClient.get_project(int(LABEL_STUDIO_SEGMENT_MATCH_PROJECT_ID))
-matching_label_config = """
+
+def set_connect_local_import_storage(
+        project: label_studio_sdk.Project,
+        local_store_path: [str],
+        regex_filter: Optional[str] = None,
+        use_blob_urls: Optional[bool] = True,
+        title: Optional[str] = '',
+        description: Optional[str] = '',
+):
+    payload = {
+        'regex_filter': regex_filter,
+        'use_blob_urls': use_blob_urls,
+        'path': local_store_path,
+        'presign': False,
+        'presign_ttl': 1,
+        'title': title,
+        'description': description,
+        'project': project.id,
+    }
+    response = project.make_request(
+        'POST', f'/api/storages/localfiles?project={project.id}', json=payload
+    )
+    return response.json()
+
+
+def get_project(project_name, label_config):
+    projects = LabelStudioClient.list_projects()
+    projects = [project for project in projects if project.title == project_name]
+    if len(projects) > 0:
+        project = projects[0]
+        return project
+
+    project = LabelStudioClient.create_project(title=project_name, label_config=label_config)
+    set_connect_local_import_storage(project, "/storage", title="Local storage")
+    return project
+
+
+MATCHING_LABEL_CONFIG = """
 <View>
   <TimeSeriesLabels name="label" toName="ts">
     <Label value="Stick only"/>
@@ -37,10 +75,8 @@ matching_label_config = """
   </View>
 </View>
 """
-if LSSegmentMatchProject.label_config != matching_label_config:
-    LSSegmentMatchProject.set_params(label_config=matching_label_config)
-LSSegmentClassifyProject = LabelStudioClient.get_project(int(LABEL_STUDIO_SEGMENT_CLASSIFY_PROJECT_ID))
-classify_label_config = """
+
+CLASSIFY_LABEL_CONFIG = """
 <View>
   <View style="width: 100%">
     <HyperText name="video" value="$video" inline="true"/>
@@ -64,5 +100,6 @@ classify_label_config = """
   </Choices>
 </View>
 """
-if LSSegmentClassifyProject.label_config != classify_label_config:
-    LSSegmentClassifyProject.set_params(label_config=classify_label_config)
+
+LSSegmentMatchProject = get_project("Segment Matching", MATCHING_LABEL_CONFIG)
+LSSegmentClassifyProject = get_project("Segment Classifying", CLASSIFY_LABEL_CONFIG)

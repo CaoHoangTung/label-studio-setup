@@ -1,3 +1,7 @@
-uploads
-downloads
-storage
+*
+!src
+!ls-sdk.patch
+!package.json
+!requirements.txt
+!tailwind.config.js
+!yarn.lock
