@@ -4,11 +4,11 @@ import label_studio_sdk
 from label_studio_sdk import Client
 from label_studio_sdk.client import ClientCredentials
 
-from env import LABEL_STUDIO_HOST, LABEL_STUDIO_USER_TOKEN
+from env import LABEL_STUDIO_HOST, LABEL_STUDIO_USER_TOKEN, LABEL_STUDIO_EMAIL, LABEL_STUDIO_PASSWORD
 
 LabelStudioClient = Client(
     url=LABEL_STUDIO_HOST,
-    credentials=ClientCredentials(api_key=LABEL_STUDIO_USER_TOKEN),
+    credentials=ClientCredentials(email=LABEL_STUDIO_EMAIL, password=LABEL_STUDIO_PASSWORD),
 )
 
 

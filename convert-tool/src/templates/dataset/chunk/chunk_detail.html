@@ -9,7 +9,7 @@
     <p>
         Your file processing is done. The data has been automatically uploaded to Label Studio
         <br/>
-        <a href="{{ label_studio_path('projects/' + get_env('LABEL_STUDIO_SEGMENT_CLASSIFY_PROJECT_ID') + '/data') }}"
+        <a href="{{ label_studio_path('projects/' + get_project_id('classify') + '/data') }}"
            target="_blank">
             See the uploaded data in Label Studio here
         </a>

@@ -1,6 +1,10 @@
 start:
 	(trap 'kill 0' SIGINT; \
-		DOTENV_FILE=./.env python3 ./convert-tool/src/app.py & \
+		DOTENV_FILE=./.env \
+		DATASET_FOLDER=./.docker/convert-tool/dataset \
+		STORAGE_FOLDER=./.docker/convert-tool/dataset \
+		DOWNLOAD_FOLDER=./.docker/convert-tool/dataset \
+		python3 ./convert-tool/src/app.py & \
 		(cd convert-tool && tailwindcss -c tailwind.config.js -i src/static/input.css -o src/static/output.css --watch) & \
 		wait \
 	)

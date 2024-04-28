@@ -46,7 +46,7 @@ def get_dataset_detail(dataset_id: str):
     if not os.path.exists(upload_dir):
         return render_template('404.html', message="Dataset not found"), 404
 
-    uploaded_files = list_numeric(upload_dir)
+    uploaded_files = os.listdir(upload_dir)
     uploaded_files.sort()
     processed_files = os.listdir(processed_dir)
     processed_files.sort()
@@ -165,7 +165,7 @@ def process_chunk_dataset(dataset_id, match_id):
 @app.route('/dataset/<dataset_id>/chunks/<chunk_id>', methods=['GET'])
 def get_chunk_detail(dataset_id, chunk_id):
     chunk_dir = get_dataset_chunk_dir(dataset_id, chunk_id)
-    chunks = [d for d in os.listdir(chunk_dir) if os.path.isdir(os.path.join(chunk_dir, d))]
+    chunks = [d for d in os.listdir(chunk_dir) if d is not None and os.path.isdir(os.path.join(chunk_dir, d))]
     return render_template("dataset/chunk/chunk_detail.html", dataset_id=dataset_id, chunk_id=chunk_id, chunks=chunks)
 
 

@@ -12,7 +12,7 @@ services:
       - backend
       - app
     environment:
-      - LABEL_STUDIO_HOST=${LABEL_STUDIO_HOST:-}
+      - LABEL_STUDIO_HOST=http://app:8000
     #   Optional: Specify SSL termination certificate & key
     #   Just drop your cert.pem and cert.key into folder 'deploy/nginx/certs'
     #      - NGINX_SSL_CERT=/certs/cert.pem
@@ -56,7 +56,7 @@ services:
     #      - LOG_LEVEL=DEBUG
     volumes:
       - .docker/mydata:/label-studio/data:rw
-      - .data/dataset:/storage
+      - .docker/convert-tool/dataset:/storage
     command: label-studio-uwsgi
 
   db:
