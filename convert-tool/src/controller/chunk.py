@@ -61,6 +61,7 @@ def chunk_video_and_sensors(dataset_id, match_id, chunk_size_second):
         sensor2_chunk.to_csv(sensor2_path)
         chunk_task = render_template(
             "dataset/chunk/import_template.json",
+            sensor="sensor1",
             dataset_id=dataset_id,
             chunk_id=chunk_id,
             idx=idx,
@@ -80,26 +81,3 @@ def chunk_video_and_sensors(dataset_id, match_id, chunk_size_second):
     LSSegmentClassifyProject.import_tasks(chunk_import_file)
 
     return chunk_id
-
-
-def create_chunk_import_file(
-        dataset_id, match_id,
-        import_file_path,
-        sample_rate1, sample_rate2,
-        csv_path1, csv_path2,
-        sensor="unknown",
-):
-    import_data = render_template(
-        "dataset/match/import_template.json",
-        sensor=str(sensor),
-        dataset_id=dataset_id,
-        sample_rate1=sample_rate1,
-        sample_rate2=sample_rate2,
-        match_id=match_id,
-        csv_path1=csv_path1,
-        csv_path2=csv_path2,
-    )
-
-    with open(import_file_path, 'w') as file:
-        print(import_data, file=file)
-    return import_file_path

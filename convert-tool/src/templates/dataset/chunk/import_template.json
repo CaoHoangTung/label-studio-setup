@@ -1,4 +1,5 @@
 {
+  "sensor": "{{ sensor }}",
   "csv_path": "/storage/{{ dataset_id }}/chunk/{{ chunk_id }}/{{ idx }}/sensor1.csv",
   "csv_path_2": "/storage/{{ dataset_id }}/chunk/{{ chunk_id }}/{{ idx }}/sensor2.csv",
   "csv": "/data/local-files/?d=storage/{{ dataset_id }}/chunk/{{ chunk_id }}/{{ idx }}/sensor1.csv",

@@ -186,12 +186,13 @@ def download_chunk_file(dataset_id, chunk_id, chunk, filename):
 @app.route('/dataset/<dataset_id>/chunks/<chunk_id>/zip', methods=['GET'])
 def download_chunk_zip(dataset_id, chunk_id):
     chunk_dir = get_dataset_chunk_dir(dataset_id, chunk_id)
-    file_basename = os.path.join(chunk_dir, f"{dataset_id}")
+    file_basename = f"{dataset_id}_{chunk_id}"
+    file_path_basename = os.path.join(chunk_dir, file_basename)
     file_path = file_basename + ".zip"
     if not os.path.exists(file_path):
-        shutil.make_archive(file_basename, "zip", chunk_dir)
+        shutil.make_archive(file_path_basename, "zip", chunk_dir)
 
-    return send_from_directory(chunk_dir, f"{dataset_id}_{chunk_id}.zip", as_attachment=True)
+    return send_from_directory(chunk_dir, file_basename + ".zip", as_attachment=True)
 
 
 if __name__ == '__main__':
