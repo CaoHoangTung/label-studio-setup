@@ -14,24 +14,31 @@
             width: 8px;
             padding: 0 5px;
         }
+
+        .range-seek::-moz-range-thumb {
+            height: 1.25em !important;
+            width: 2px !important;
+            border-radius: 0 !important;
+        }
+
+
     </style>
 
     <script>
         {% include 'dataset/match/_datascript.js' %}
     </script>
-
 {% endblock %}
 
 {% block content %}
 
     <h1>Extract & Match Sensor Data</h1>
-
     <form
             action="{{ url_for('process_match_dataset', dataset_id=dataset_id) }}"
             method="POST"
             enctype="multipart/form-data"
             id="uploadForm"
             autocomplete="off"
+            onkeydown="return event.key !== 'Enter';"
     >
         <h2>Video</h2>
         <video
@@ -50,10 +57,13 @@
                 <div class="flex flex-row gap-2">
                     <input
                             class="form-field-input flex-1"
+                            type="number"
                             name="video-start"
                             id="video-start"
                             value="0"
+                            onchange="window.autoSetAllEndPosition()"
                     />
+
                     <button
                             class="btn btn-primary"
                             type="button"
@@ -64,12 +74,14 @@
                 </div>
             </div>
             <div class="flex flex-col flex-1">
-                <label for="video-start" class="form-field-label">End position:</label>
+                <label for="video-end" class="form-field-label">End position:</label>
                 <div class="flex flex-row gap-2">
                     <input
                             class="form-field-input flex-1"
+                            type="number"
                             name="video-end"
                             id="video-end"
+                            onchange="window.autoSetAllEndPosition()"
                     />
                     <button
                             class="btn btn-primary"

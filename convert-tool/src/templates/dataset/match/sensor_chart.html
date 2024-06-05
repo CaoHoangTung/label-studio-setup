@@ -14,6 +14,7 @@
                             oninput="window.updateChartScale('{{ id }}', this.value)"
                             class="my-2"
                     />
+
                 </div>
                 <div class="flex flex-col md:flex-row flex-1 items-stretch md:items-center">
                     <div class="flex-1 max-w-full md:max-w-[350px] h-[200px]">
@@ -47,16 +48,28 @@
             >
                 <iconify-icon icon="ph:caret-left-bold"></iconify-icon>
             </button>
-            <input
-                    class="w-full flex-1"
-                    type="range"
-                    id="{{ id }}-time-slider"
-                    min="0"
-                    max=""
-                    step="1"
-                    value="0"
-                    oninput="window.seekSensorTime(parseInt(this.value), '{{ id }}', 'slider')"
-            />
+            <div class="flex flex-col flex-1 w-full">
+                <input
+                        class="w-full flex-1 range-seek"
+                        type="range"
+                        id="{{ id }}-time-slider"
+                        min="0"
+                        max=""
+                        step="1"
+                        value="0"
+                        oninput="window.seekSensorTime(parseInt(this.value), '{{ id }}', 'slider')"
+                />
+                <div id="{{ id }}-ticks" class="w-full block relative">
+                    <div id="{{ id }}-tick-start" class="-translate-x-1/2 p-1 absolute">
+                        <div class="h-[8px] w-[2px] bg-orange-700 absolute left-1/2 translate-y-[-20px]"></div>
+                        <span class="text-xs top-0 block border border-neutral-500 rounded bg-blue-100">Start</span>
+                    </div>
+                    <div id="{{ id }}-tick-end" class="-translate-x-1/2 p-1 absolute">
+                        <div class="h-[8px] w-[2px] bg-orange-700 absolute left-1/2 translate-y-[-20px]"></div>
+                        <span class="text-xs top-0 block border border-neutral-500 rounded bg-blue-100">End</span>
+                    </div>
+                </div>
+            </div>
             <input
                     class="form-field-input form-field-input-sm w-[80px]"
                     type="number"
@@ -98,11 +111,12 @@
                             type="number"
                             min="0"
                             value="0"
+                            onchange="window.autoSetEndPosition('{{ id }}') && window.setSensorLocationMarks('{{ id }}')"
                     />
                     <button
                             class="btn btn-primary"
                             type="button"
-                            onclick="window.setSensorPosition('{{ id }}', '{{ id }}-start')"
+                            onclick="window.setSensorPosition('{{ id }}', 'start')"
                     >
                         Set current time as start
                     </button>
@@ -119,11 +133,12 @@
                             id="{{ id }}-end"
                             min="0"
                             value="0"
+                            onchange="window.setSensorLocationMarks('{{ id }}')"
                     />
                     <button
                             class="btn btn-primary"
                             type="button"
-                            onclick="window.setSensorPosition('{{ id }}', '{{ id }}-end')"
+                            onclick="window.setSensorPosition('{{ id }}', 'end')"
                     >
                         Set current time as end
                     </button>

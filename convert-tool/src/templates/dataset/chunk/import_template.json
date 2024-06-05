@@ -4,6 +4,6 @@
   "csv_path_2": "/storage/{{ dataset_id }}/chunk/{{ chunk_id }}/{{ idx }}/sensor2.csv",
   "csv": "/data/local-files/?d=storage/{{ dataset_id }}/chunk/{{ chunk_id }}/{{ idx }}/sensor1.csv",
   "csv2": "/data/local-files/?d=storage/{{ dataset_id }}/chunk/{{ chunk_id }}/{{ idx }}/sensor2.csv",
-  "video": "<video src='/data/local-files/?d=storage/{{ dataset_id }}/chunk/{{ chunk_id }}/{{ idx }}/video.mp4' type='video/quicktime' width='100%' controls loop onloadeddata=\"setTimeout(function(){ts=Htx.annotationStore.selected.names.get('ts');t=ts.data.index;v=document.getElementsByTagName('video')[0];w=parseInt(t.length*(5/v.duration));l=t.length-w;ts.updateTR([t[0], t[w]], 1.001);r=$=>
+  "video": "<video style='max-width: 500px' src='/data/local-files/?d=storage/{{ dataset_id }}/chunk/{{ chunk_id }}/{{ idx }}/video.mp4' type='video/quicktime' width='100%' controls loop onloadeddata=\"setTimeout(function(){ts=Htx.annotationStore.selected.names.get('ts');t=ts.data.index;v=document.getElementsByTagName('video')[0];w=parseInt(t.length*(5/v.duration));l=t.length-w;ts.updateTR([t[0], t[w]], 1.001);r=$=>
 ts.brushRange.map(n=>(+n).toFixed(2));_=r();setInterval($=>r().some((n,i)=>n!==_[i])&&(_=r())&&(v.currentTime=v.duration*(r()[0]-t[0])/(t.slice(-1)[0]-t[0]-(r()[1]-r()[0]))),300); console.log('video is loaded, starting to sync with time series')}, 3000); \" />"
 }

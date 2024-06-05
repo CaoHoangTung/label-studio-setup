@@ -18,8 +18,8 @@ services:
     #      - NGINX_SSL_CERT=/certs/cert.pem
     #      - NGINX_SSL_CERT_KEY=/certs/cert.key
     volumes:
-      - .docker/mydata:/label-studio/data:rw
-      - .docker/convert-tool/dataset:/storage
+      - ls-data:/label-studio/data:rw
+      - convert-tool-dataset:/storage
       #   Optional: Override nginx default conf
       #      - ./deploy/my.conf:/etc/nginx/nginx.conf
     command: nginx
@@ -55,8 +55,8 @@ services:
 
     #      - LOG_LEVEL=DEBUG
     volumes:
-      - .docker/mydata:/label-studio/data:rw
-      - .docker/convert-tool/dataset:/storage
+      - ls-data:/label-studio/data:rw
+      - convert-tool-dataset:/storage
     command: label-studio-uwsgi
 
   db:
@@ -79,8 +79,7 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
     volumes:
-      - ${POSTGRES_DATA_DIR:-.docker/postgres-data}:/var/lib/postgresql/data
-      - .docker/deploy/pgsql/certs:/var/lib/postgresql/certs:ro
+      - postgres_data:/var/lib/postgresql/data
 
   convert-tool:
     build: convert-tool
@@ -91,7 +90,8 @@ services:
     networks:
       - app
     volumes:
-      - .docker/convert-tool:/app/.data
+      - convert-tool:/app/.data
+      - convert-tool-dataset:/app/.data/dataset
     ports:
       - "5000:5000"
     environment:
@@ -104,3 +104,9 @@ services:
 networks:
   app:
   backend:
+
+volumes:
+  postgres_data:
+  convert-tool:
+  convert-tool-dataset:
+  ls-data:

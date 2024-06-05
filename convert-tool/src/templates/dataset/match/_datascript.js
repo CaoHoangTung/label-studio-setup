@@ -14,11 +14,11 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     window.setTotalVideoTime = function () {
         const videoElement = document.querySelector("video");
         const videoEndElement = document.getElementById("video-end");
-        const v = parseInt(videoEndElement.value);
+        const v = videoEndElement.value;
         if (!isNaN(v) && v > 0) {
             return;
         }
-        videoEndElement.value = videoElement.duration * videoElement.playbackRate;
+        videoEndElement.value = Math.floor(videoElement.duration * videoElement.playbackRate);
     };
 
     const sensorData = await fetch(
@@ -32,42 +32,50 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     document.getElementById("sensor-data-loader").classList.add("hidden")
     document.getElementById("sensor-data-sections").classList.replace("hidden", "flex")
 
-    const s1Slider = document.getElementById("sensor1-time-slider");
-    const s1Input = document.getElementById("sensor1-time-input");
-    const s1Start = document.getElementById("sensor1-start");
-    const s1End = document.getElementById("sensor1-end");
+    function setupValues() {
+        const s1Slider = document.getElementById("sensor1-time-slider");
+        const s1Input = document.getElementById("sensor1-time-input");
+        const s1Start = document.getElementById("sensor1-start");
+        const s1End = document.getElementById("sensor1-end");
 
-    s1Slider.max = sensorData.sensor1.size;
-    s1Input.max = sensorData.sensor1.size;
-    s1End.value = sensorData.sensor1.size;
-    s1Start.max = sensorData.sensor1.size;
-    s1End.max = sensorData.sensor1.size;
+        s1Slider.max = sensorData.sensor1.size;
+        s1Input.max = sensorData.sensor1.size;
+        s1End.value = sensorData.sensor1.size;
+        s1Start.max = sensorData.sensor1.size;
+        s1End.max = sensorData.sensor1.size;
 
-    const s2Slider = document.getElementById("sensor2-time-slider");
-    const s2Input = document.getElementById("sensor2-time-input");
-    const s2Start = document.getElementById("sensor2-start");
-    const s2End = document.getElementById("sensor2-end");
-    s2Slider.max = sensorData.sensor2.size;
-    s2Input.max = sensorData.sensor2.size;
-    s2End.value = sensorData.sensor2.size;
-    s2Start.max = sensorData.sensor2.size;
-    s2End.max = sensorData.sensor2.size;
+        const s2Slider = document.getElementById("sensor2-time-slider");
+        const s2Input = document.getElementById("sensor2-time-input");
+        const s2Start = document.getElementById("sensor2-start");
+        const s2End = document.getElementById("sensor2-end");
+        s2Slider.max = sensorData.sensor2.size;
+        s2Input.max = sensorData.sensor2.size;
+        s2End.value = sensorData.sensor2.size;
+        s2Start.max = sensorData.sensor2.size;
+        s2End.max = sensorData.sensor2.size;
 
-    let sensor1 = setupChart("sensor1-canvas", sensorData["sensor1"], "sensor1");
-    let sensor2 = setupChart("sensor2-canvas", sensorData["sensor2"], "sensor2");
-    const sensorChartData = {
-        sensor1: sensor1,
-        sensor2: sensor2,
-    };
-    const sensorPosition = {
-        sensor1: 0,
-        sensor2: 0,
-    };
+        window.autoSetEndPosition("sensor1")
+        window.autoSetEndPosition("sensor2")
+        window.setSensorLocationMarks("sensor1")
+        window.setSensorLocationMarks("sensor2")
 
-    const sensorActions = {
-        sensor1: {},
-        sensor2: {},
-    };
+        let sensor1 = setupChart("sensor1-canvas", sensorData["sensor1"], "sensor1");
+        let sensor2 = setupChart("sensor2-canvas", sensorData["sensor2"], "sensor2");
+        window.sensorChartData = {
+            sensor1: sensor1,
+            sensor2: sensor2
+        };
+        window.sensorPosition = {
+            sensor1: 0,
+            sensor2: 0
+        };
+
+        window.sensorActions = {
+            sensor1: {},
+            sensor2: {}
+        };
+    }
+
 
     window.setVideoPosition = function (positionType) {
         const start = parseInt(document.getElementById("video-start").value);
@@ -86,7 +94,20 @@ document.addEventListener("DOMContentLoaded", async (event) => {
         }
 
         document.getElementById(positionType).value = currentFrame;
+
+        window.autoSetAllEndPosition()
     };
+
+    window.setSensorLocationMarks = function (sensorName) {
+        const start = parseInt(document.getElementById(`${sensorName}-start`).value);
+        const end = parseInt(document.getElementById(`${sensorName}-end`).value);
+        const length = parseInt(document.getElementById(`${sensorName}-time-slider`).max);
+
+        const startPct = start / length * 100
+        const endPct = end / length * 100
+        document.getElementById(`${sensorName}-tick-start`).style.left = `${startPct}%`;
+        document.getElementById(`${sensorName}-tick-end`).style.left = `${endPct}%`;
+    }
 
     function label(tooltipItem, sensorName) {
         const actualDataIndex = parseInt(tooltipItem.label);
@@ -103,17 +124,17 @@ document.addEventListener("DOMContentLoaded", async (event) => {
             scales: {
                 y: {
                     suggestedMax: scale,
-                    suggestedMin: -scale,
-                },
+                    suggestedMin: -scale
+                }
             },
             plugins: {
                 tooltip: {
                     callbacks: {
-                        label: (tooltipItem) => label(tooltipItem, sensorName),
-                    },
-                },
+                        label: (tooltipItem) => label(tooltipItem, sensorName)
+                    }
+                }
             },
-            animation: false,
+            animation: false
         };
     }
 
@@ -135,18 +156,18 @@ document.addEventListener("DOMContentLoaded", async (event) => {
                             label: chartId,
                             data: data[axis].slice(0, WINDOW_SIZE),
                             borderColor: AXES_COLORS[axis],
-                            backgroundColor: "transparent",
-                        },
-                    ],
+                            backgroundColor: "transparent"
+                        }
+                    ]
                 },
-                options: createChartOption(sensorName, 3),
+                options: createChartOption(sensorName, 3)
             });
         })
         // Set up the chart
 
         return {
             chart: chart,
-            originalData: data,
+            originalData: data
         };
     }
 
@@ -156,7 +177,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
         AXES.forEach(axis => {
             // Update the chart's options with the new scale options
-            const chart = sensorChartData[sensorName].chart[axis];
+            const chart = window.sensorChartData[sensorName].chart[axis];
             chart.config.options = newScaleOptions;
             chart.update();
         })
@@ -181,9 +202,9 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
     // Function to seek to a specific time in the animation
     window.seekSensorTime = function (time, sensorName, inputElementType) {
-        seekChart(sensorChartData[sensorName], time);
+        seekChart(window.sensorChartData[sensorName], time);
 
-        sensorPosition[sensorName] = time;
+        window.sensorPosition[sensorName] = time;
 
         if (inputElementType === "slider") {
             document.getElementById(`${sensorName}-time-input`).value = time;
@@ -206,7 +227,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     };
 
     function seekStep(step, sensorName) {
-        let newTime = sensorPosition[sensorName] + step;
+        let newTime = window.sensorPosition[sensorName] + step;
         newTime = Math.max(0, newTime);
         newTime = Math.min(newTime, sensorData[sensorName].x.length);
         document.getElementById(`${sensorName}-time-slider`).value = newTime;
@@ -215,6 +236,37 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     }
 
     window.setSensorPosition = function (sensorName, positionType) {
-        document.getElementById(positionType).value = sensorPosition[sensorName];
+        const start = parseFloat(document.getElementById(sensorName + '-start').value);
+        const end = parseFloat(document.getElementById(sensorName + '-end').value);
+        if (positionType === "start" && window.sensorPosition[sensorName] > end) {
+            document.getElementById(sensorName + '-start').value = window.sensorPosition[sensorName];
+            window.autoSetEndPosition(sensorName)
+            window.setSensorLocationMarks(sensorName)
+            return
+        }
+
+        if (positionType === "end" && window.sensorPosition[sensorName] < start) {
+            alert("End position must not be less than start")
+            return
+        }
+
+        document.getElementById(sensorName + '-' + positionType).value = window.sensorPosition[sensorName];
+        window.setSensorLocationMarks(sensorName)
     };
+
+    window.autoSetEndPosition = function (sensorName) {
+        const start = parseFloat(document.getElementById(sensorName + '-start').value);
+        const videoStart = parseFloat(document.getElementById("video-start").value);
+        const videoEnd = parseFloat(document.getElementById("video-end").value);
+        const endElement = document.getElementById(sensorName + '-end');
+        const expectedEnd = Math.floor((videoEnd - videoStart) * 100 + start)
+        endElement.value = Math.min(parseInt(endElement.max), expectedEnd);
+    };
+
+    window.autoSetAllEndPosition = function () {
+        window.autoSetEndPosition('sensor1');
+        window.autoSetEndPosition('sensor2');
+    }
+
+    setupValues()
 });

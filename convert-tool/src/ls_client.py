@@ -68,7 +68,7 @@ MATCHING_LABEL_CONFIG = """
         <HyperText name="video" value="$video" inline="true"/>
     </View>
     <View style="width: 100%">
-      <TimeSeries name="ts" value="$csv" valueType="url" timeColumn="index">
+      <TimeSeries name="ts" value="$csv" valueType="url" timeColumn="index" fixedScale="true" overviewWidth="100%">
         <Channel column="ax3_bandpass"/>
       </TimeSeries>
     </View>
@@ -80,7 +80,7 @@ CLASSIFY_LABEL_CONFIG = """
 <View>
   <View style="width: 100%">
     <HyperText name="video" value="$video" inline="true"/>
-    <TimeSeries name="ts" value="$csv" valueType="url" timeColumn="index">
+    <TimeSeries name="ts" value="$csv" valueType="url" timeColumn="index" fixedScale="true" overviewWidth="100%">
         <Channel column="ax3_bandpass"/>
       </TimeSeries>
   </View>
