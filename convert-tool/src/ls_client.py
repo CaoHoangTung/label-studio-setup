@@ -98,6 +98,7 @@ CLASSIFY_LABEL_CONFIG = """
     <Choice value="Static (sitting/standing/lying)"/>
     <Choice value="Standing or sitting with arms active"/>
   </Choices>
+  <TextArea name="info"></TextArea>
 </View>
 """
 

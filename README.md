@@ -65,27 +65,9 @@ Username: upwatcher@gmail.com
 Password: upwatch
 ```
 
-#### Add local storage
-To add the directory to store your data, perform the following steps
-
-1. Click on the newly created project.
-2. Click on `Settings` at the top right corner.
-3. Select the `Cloud Storage` menu item.
-4. Click `Add Source Storage`.
-5. Configure the **Source** storage with the following settings. Click `Check Connection` to confirm that the storage is valid, then click `Add Storage`. Then click `Sync Storage`.
-    - Storage Type: `Local files`
-    - Storage Title: `Input Storage`
-    - Absolute local path: `/label-studio/data/storage/input`
-    - File Filter Regex: `.*(MOV|mov|MP4|mp4|CSV|csv)`
-![Configure storage](assets/09-config-storage.jpg)
-6. Configure the **Target** storage with the following settings. Click `Check Connection` to confirm that the storage is valid, then click `Add Storage`.
-    - Storage Type: `Local files`
-    - Storage Title: `Output Storage`
-    - Absolute local path: `/label-studio/data/storage/output`
-![Configure storage](assets/10-config-storage-out.jpg)
-
-
 ### Annotation setup
+- In order to update the labelling configuration, we need to update [convert-tool/src/ls_client.py](./convert-tool/src/ls_client.py).
+- The labelling configuration are stored in two variables: `MATCHING_LABEL_CONFIG` and `CLASSIFY_LABEL_CONFIG`. You can update those files according to the [Label Studio official guide](https://labelstud.io/tags/)
 
 #### Importing data
 To import the data, refer to the following step to use the data convert tool to create import files for the annotation tool. You can access the data convert tool at [http://localhost:5000](http://localhost:5000)
