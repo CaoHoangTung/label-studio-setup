@@ -4,34 +4,41 @@ import label_studio_sdk
 from label_studio_sdk import Client
 from label_studio_sdk.client import ClientCredentials
 
-from env import LABEL_STUDIO_HOST, LABEL_STUDIO_USER_TOKEN, LABEL_STUDIO_EMAIL, LABEL_STUDIO_PASSWORD
+from env import (
+    LABEL_STUDIO_HOST,
+    LABEL_STUDIO_USER_TOKEN,
+    LABEL_STUDIO_EMAIL,
+    LABEL_STUDIO_PASSWORD,
+)
 
 LabelStudioClient = Client(
     url=LABEL_STUDIO_HOST,
-    credentials=ClientCredentials(email=LABEL_STUDIO_EMAIL, password=LABEL_STUDIO_PASSWORD),
+    credentials=ClientCredentials(
+        email=LABEL_STUDIO_EMAIL, password=LABEL_STUDIO_PASSWORD
+    ),
 )
 
 
 def set_connect_local_import_storage(
-        project: label_studio_sdk.Project,
-        local_store_path: [str],
-        regex_filter: Optional[str] = None,
-        use_blob_urls: Optional[bool] = True,
-        title: Optional[str] = '',
-        description: Optional[str] = '',
+    project: label_studio_sdk.Project,
+    local_store_path: [str],
+    regex_filter: Optional[str] = None,
+    use_blob_urls: Optional[bool] = True,
+    title: Optional[str] = "",
+    description: Optional[str] = "",
 ):
     payload = {
-        'regex_filter': regex_filter,
-        'use_blob_urls': use_blob_urls,
-        'path': local_store_path,
-        'presign': False,
-        'presign_ttl': 1,
-        'title': title,
-        'description': description,
-        'project': project.id,
+        "regex_filter": regex_filter,
+        "use_blob_urls": use_blob_urls,
+        "path": local_store_path,
+        "presign": False,
+        "presign_ttl": 1,
+        "title": title,
+        "description": description,
+        "project": project.id,
     }
     response = project.make_request(
-        'POST', f'/api/storages/localfiles?project={project.id}', json=payload
+        "POST", f"/api/storages/localfiles?project={project.id}", json=payload
     )
     return response.json()
 
@@ -41,9 +48,12 @@ def get_project(project_name, label_config):
     projects = [project for project in projects if project.title == project_name]
     if len(projects) > 0:
         project = projects[0]
+        project.set_params(label_config=label_config) 
         return project
 
-    project = LabelStudioClient.create_project(title=project_name, label_config=label_config)
+    project = LabelStudioClient.create_project(
+        title=project_name, label_config=label_config
+    )
     set_connect_local_import_storage(project, "/storage", title="Local storage")
     return project
 
@@ -98,7 +108,7 @@ CLASSIFY_LABEL_CONFIG = """
     <Choice value="Static (sitting/standing/lying)"/>
     <Choice value="Standing or sitting with arms active"/>
   </Choices>
-  <TextArea name="info"></TextArea>
+  <TextArea name="customTag" placeholder="Custom Tag (Optional)" toName="video"></TextArea>
 </View>
 """
 
