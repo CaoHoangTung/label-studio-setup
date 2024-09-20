@@ -48,7 +48,7 @@ def get_project(project_name, label_config):
     projects = [project for project in projects if project.title == project_name]
     if len(projects) > 0:
         project = projects[0]
-        project.set_params(label_config=label_config) 
+        project.set_params(label_config=label_config)
         return project
 
     project = LabelStudioClient.create_project(
@@ -73,16 +73,10 @@ MATCHING_LABEL_CONFIG = """
     <Label value="Static (sitting/standing/lying)"/>
     <Label value="Standing or sitting with arms active"/>
   </TimeSeriesLabels>
-  <View style="display: flex;">
-    <View style="width: 100%">
-        <HyperText name="video" value="$video" inline="true"/>
-    </View>
-    <View style="width: 100%">
-      <TimeSeries name="ts" value="$csv" valueType="url" timeColumn="index" fixedScale="true" overviewWidth="100%">
-        <Channel column="ax3_bandpass"/>
-      </TimeSeries>
-    </View>
-  </View>
+  <HyperText name="video" value="$video" inline="true"/>
+  <TimeSeries name="ts" value="$csv" valueType="url" timeColumn="index" fixedScale="true" overviewWidth="25%">
+    <Channel column="ax3_bandpass"/>
+  </TimeSeries>
 </View>
 """
 

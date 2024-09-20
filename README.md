@@ -66,8 +66,21 @@ Password: upwatch
 ```
 
 ### Annotation setup
-- In order to update the labelling configuration, we need to update [convert-tool/src/ls_client.py](./convert-tool/src/ls_client.py).
-- The labelling configuration are stored in two variables: `MATCHING_LABEL_CONFIG` and `CLASSIFY_LABEL_CONFIG`. You can update those files according to the [Label Studio official guide](https://labelstud.io/tags/)
+
+#### Labeling Config
+In order to update the labeling configuration, we can perform one of the following methods:
+1. Code modification:
+    - Update [convert-tool/src/ls_client.py](./convert-tool/src/ls_client.py).
+    - The labelling configuration are stored in two variables: `MATCHING_LABEL_CONFIG` and `CLASSIFY_LABEL_CONFIG`. You can update those files according to the [Label Studio official guide](https://labelstud.io/tags/)
+
+2. UI modification: for simple changes such as updating the list of labels.
+    - Navigate to one of the two projects: Segment Classifying/Segment Matching
+    - Click the Settings button on the top-right corner
+    - Navigate to the Labeling Interface section
+    - Use the Visual interface and add new label name
+
+    ![Upload Labeling Config](assets/21-updating-label-config.jpg)
+
 
 #### Importing data
 To import the data, refer to the following step to use the data convert tool to create import files for the annotation tool. You can access the data convert tool at [http://localhost:5000](http://localhost:5000)
