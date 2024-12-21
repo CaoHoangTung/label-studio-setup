@@ -5,6 +5,8 @@
 <title></title>
 
 {% block content %}
+    <a
+            href="{{ url_for('get_dataset_detail', dataset_id=dataset_id) }}">← Back to dataset</a>
     <h1>Instructions</h1>
     <p>
         Your file processing is done. The data has been automatically uploaded to Label Studio

@@ -52,9 +52,10 @@
                     <a href="{{ url_for('get_match_detail', dataset_id=dataset_id, match_id=match) }}">
                         {{ match | ctime }}
                     </a>
-                    <a class="w-4 h-4" href="{{ url_for('delete_match_detail', dataset_id=dataset_id, match_id=match) }}">
-                        <iconify-icon icon="ph:trash-bold" class="w-4 h-4 text-red-700"></iconify-icon>
-                    </a>
+{#                    <button class="w-4 h-4"#}
+{#                            onclick="confirmBeforeNavigation('{{ url_for('delete_match_detail', dataset_id=dataset_id, match_id=match) }}', 'Deleting this match will not delete the related task in Label Studio, but will render the task\'s data invalid. You\'ll need to delete the task yourself. Proceed?')">#}
+{#                        <iconify-icon icon="ph:trash-bold" class="w-4 h-4 text-red-700"></iconify-icon>#}
+{#                    </button>#}
                 </li>
             {% endfor %}
         </ul>
@@ -70,9 +71,10 @@
                     <a href="{{ url_for('get_chunk_detail', dataset_id=dataset_id, chunk_id=chunk) }}">
                         {{ chunk | ctime }}
                     </a>
-                    <a class="w-4 h-4" href="{{ url_for('delete_chunk_detail', dataset_id=dataset_id, chunk_id=chunk) }}">
-                        <iconify-icon icon="ph:trash-bold" class="w-4 h-4 text-red-700"></iconify-icon>
-                    </a>
+{#                    <a class="w-4 h-4"#}
+{#                       href="{{ url_for('delete_chunk_detail', dataset_id=dataset_id, chunk_id=chunk) }}">#}
+{#                        <iconify-icon icon="ph:trash-bold" class="w-4 h-4 text-red-700"></iconify-icon>#}
+{#                    </a>#}
                 </li>
             {% endfor %}
         </ul>

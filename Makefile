@@ -17,3 +17,9 @@ label_studio:
 
 label_studio_down:
 	docker compose -f docker-compose.dev.yml down
+
+dev_services:
+	docker compose up -d nginx app db
+
+dev:
+	python convert-tool/src/app.py

@@ -10,6 +10,9 @@
     </title>
     {% block extra_header %}
     {% endblock %}
+    <script>
+        {% include 'scripts/custom.js' %}
+    </script>
     <link href="/static/output.css" rel="stylesheet"/>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
 </head>
@@ -28,8 +31,7 @@
             ></iconify-icon>
             <span
                     class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white"
-            >MOV + CWA processor</span
-            >
+            >MOV + CWA processor</span>
         </a>
         <button
                 data-collapse-toggle="navbar-default"

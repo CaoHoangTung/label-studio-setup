@@ -198,4 +198,8 @@ def download_chunk_zip(dataset_id, chunk_id):
 if __name__ == '__main__':
     """Start a background thread that cleans up old tasks."""
 
-    app.run(host="0.0.0.0", debug=not os.environ.get("PRODUCTION", False))
+    app.run(
+        host="0.0.0.0",
+        debug=not os.environ.get("PRODUCTION", False),
+        port=os.environ.get("PORT", 5000)
+    )

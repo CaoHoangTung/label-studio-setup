@@ -20,12 +20,12 @@ LabelStudioClient = Client(
 
 
 def set_connect_local_import_storage(
-    project: label_studio_sdk.Project,
-    local_store_path: [str],
-    regex_filter: Optional[str] = None,
-    use_blob_urls: Optional[bool] = True,
-    title: Optional[str] = "",
-    description: Optional[str] = "",
+        project: label_studio_sdk.Project,
+        local_store_path: [str],
+        regex_filter: Optional[str] = None,
+        use_blob_urls: Optional[bool] = True,
+        title: Optional[str] = "",
+        description: Optional[str] = "",
 ):
     payload = {
         "regex_filter": regex_filter,
@@ -73,20 +73,30 @@ MATCHING_LABEL_CONFIG = """
     <Label value="Static (sitting/standing/lying)"/>
     <Label value="Standing or sitting with arms active"/>
   </TimeSeriesLabels>
-  <HyperText name="video" value="$video" inline="true"/>
-  <TimeSeries name="ts" value="$csv" valueType="url" timeColumn="index" fixedScale="true" overviewWidth="25%">
-    <Channel column="ax3_bandpass"/>
-  </TimeSeries>
+  <View style="width: 100%; display: flex; flex-direction: row; flex-wrap: wrap">
+    <View style="flex: 1 0 300px;">
+      <HyperText name="video" value="$video" inline="true"/>
+    </View>
+    <View style="flex: 1 0 300px;">
+      <TimeSeries name="ts" value="$csv" valueType="url" timeColumn="index" fixedScale="true" overviewWidth="25%">
+        <Channel column="ax3_bandpass"/>
+      </TimeSeries>
+    </View>
+  </View>
 </View>
 """
 
 CLASSIFY_LABEL_CONFIG = """
 <View>
-  <View style="width: 100%">
-    <HyperText name="video" value="$video" inline="true"/>
-    <TimeSeries name="ts" value="$csv" valueType="url" timeColumn="index" fixedScale="true" overviewWidth="100%">
+  <View style="width: 100%; display: flex; flex-direction: row; flex-wrap: wrap">
+    <View style="flex: 1 0 300px;">
+      <HyperText name="video" value="$video" inline="true" />
+    </View>
+    <View style="flex: 1 0 300px;">
+      <TimeSeries name="ts" value="$csv" valueType="url" timeColumn="index" fixedScale="true" overviewWidth="100%">
         <Channel column="ax3_bandpass"/>
       </TimeSeries>
+    </View>
   </View>
 
   <Choices name="label" toName="video">
