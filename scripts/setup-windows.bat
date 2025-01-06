@@ -6,4 +6,4 @@ call echo Installing...
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 call echo Installing Label Studio
 
-call docker compose up -d
+call docker compose up -d --build

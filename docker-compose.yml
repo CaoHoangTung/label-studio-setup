@@ -1,7 +1,8 @@
-version: "3.9"
 services:
   nginx:
-    image: heartexlabs/label-studio:latest
+    image: ailaunch/label-studio:latest
+    build:
+      context: label-studio
     restart: unless-stopped
     ports:
       - "8080:8085"
@@ -27,7 +28,7 @@ services:
   app:
     stdin_open: true
     tty: true
-    image: heartexlabs/label-studio:latest
+    image: ailaunch/label-studio:latest
     build:
       context: label-studio
     restart: unless-stopped
@@ -53,7 +54,6 @@ services:
       - LABEL_STUDIO_USERNAME=upwatcher@gmail.com
       - LABEL_STUDIO_PASSWORD=upwatch
 
-    #      - LOG_LEVEL=DEBUG
     volumes:
       - ls-data:/label-studio/data:rw
       - convert-tool-dataset:/storage
