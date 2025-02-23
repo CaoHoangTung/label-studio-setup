@@ -1,6 +1,6 @@
 services:
   nginx:
-    image: ailaunch/label-studio:latest
+    image: ghcr.io/caohoangtung/label-studio-setup:2.3.0
     build:
       context: label-studio
     restart: unless-stopped
@@ -28,7 +28,7 @@ services:
   app:
     stdin_open: true
     tty: true
-    image: ailaunch/label-studio:latest
+    image: ghcr.io/caohoangtung/label-studio-setup:2.3.0
     build:
       context: label-studio
     restart: unless-stopped
@@ -83,7 +83,7 @@ services:
 
   convert-tool:
     build: convert-tool
-    image: labelstudio-convert-tool
+    image: ghcr.io/caohoangtung/label-studio-convert-tool:2.3.0
     restart: unless-stopped
     depends_on:
       - nginx
